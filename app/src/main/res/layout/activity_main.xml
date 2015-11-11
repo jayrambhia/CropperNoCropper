@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".MainActivity">
+
+    <FrameLayout
+        android:id="@+id/top_frame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.fenctose.imagecropper.CropperView
+            android:background="#ff282828"
+            android:id="@+id/imageview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:grid_opacity="0.8"
+            app:grid_thickness="0.8dp"
+            app:grid_color="@color/colorAccent"/>
+
+        <ImageView
+            android:id="@+id/snap_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="16dp"
+            android:padding="8dp"
+            android:layout_gravity="left|bottom"
+            android:background="@drawable/black_transp_circ_ripple"
+            android:scaleType="center"
+            android:src="@mipmap/ic_crop_free_white_24dp"/>
+
+        <ImageView
+            android:id="@+id/rotate_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:layout_margin="16dp"
+            android:layout_gravity="right|bottom"
+            android:background="@drawable/black_transp_circ_ripple"
+            android:scaleType="center"
+            android:src="@mipmap/ic_rotate_right_white_24dp"/>
+
+    </FrameLayout>
+    
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#ff212121"
+        android:padding="16dp"
+        android:layout_below="@id/top_frame"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Upload Image"
+            android:id="@+id/image_button"/>
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Crop"
+            android:id="@+id/crop_button"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
