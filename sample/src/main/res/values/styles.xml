@@ -8,10 +8,4 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <declare-styleable name="CropperView">
-        <attr name="grid_color" format="color"/>
-        <attr name="grid_thickness" format="dimension"/>
-        <attr name="grid_opacity" format="float"/>
-    </declare-styleable>
-
 </resources>

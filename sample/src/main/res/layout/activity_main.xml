@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.fenctose.imagecropper.CropperView
+        <com.fenchtose.nocropper.CropperView
             android:background="#ff282828"
             android:id="@+id/imageview"
             android:layout_width="match_parent"

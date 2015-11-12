@@ -1,4 +1,4 @@
-package com.fenctose.imagecropper;
+package com.fenchtose.nocropper;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 /**
- * Created by Administrator on 11/4/2015.
+ * Created by Jay Rambhia on 11/4/2015.
  */
 public class CropperView extends FrameLayout {
 
@@ -47,7 +47,7 @@ public class CropperView extends FrameLayout {
     }
 
     private void init(Context context, AttributeSet attrs) {
-        mImageView = new CropperImageView(context);
+        mImageView = new CropperImageView(context, attrs);
         mGridView = new CropperGridView(context, attrs);
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 0);
@@ -93,13 +93,11 @@ public class CropperView extends FrameLayout {
 
         @Override
         public void onGestureStarted() {
-            Log.i(TAG, "show grid");
             mGridView.setShowGrid(true);
         }
 
         @Override
         public void onGestureCompleted() {
-            Log.i(TAG, "hide grid");
             mGridView.setShowGrid(false);
         }
     }
@@ -110,5 +108,13 @@ public class CropperView extends FrameLayout {
 
     public void fitToCenter() {
         mImageView.fitToCenter();
+    }
+
+    public void setPaddingColor(int color) {
+        mImageView.setPaddingColor(color);
+    }
+
+    public int getPaddingColor() {
+        return mImageView.getPaddingColor();
     }
 }

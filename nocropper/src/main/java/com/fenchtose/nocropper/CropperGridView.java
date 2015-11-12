@@ -1,4 +1,4 @@
-package com.fenctose.imagecropper;
+package com.fenchtose.nocropper;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -11,9 +11,8 @@ import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.View;
 
-
 /**
- * Created by Administrator on 11/4/2015.
+ * Created by Jay Rambhia on 11/4/2015.
  */
 public class CropperGridView extends View {
 

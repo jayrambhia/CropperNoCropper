@@ -14,6 +14,18 @@ It's a FrameLayout which contains a view for Grid and an imageview. This project
 CropperView contains some basic methods like `setImageBitmap()`, `setMaxZoom()`, `setMinZoom()`, etc which are
 forwarded to `CropperImageView`.
 
+### How To Install
+
+    repositories {
+        maven {
+            url  "http://dl.bintray.com/jayrambhia/maven"
+        }
+    }
+
+    dependencies {
+        compile 'com.fenchtose.nocropper:nocropper:0.1.1'
+    }
+
 ### CropperImageView
 
 It's a square ImageView which acts as the cropper. It tries to keep the image in the range of max and min zoom.
@@ -32,3 +44,4 @@ It automatically adjusts the position of the image, if it's zoomed out.
  - `grid_color` - Color of the grid
  - `grid_thickness` - Thickness of grid lines
  - `grid_opacity` - Opacity of grid lines
+ - `padding_color` - Color of the image padding

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CropperView">
+        <attr name="grid_color" format="color"/>
+        <attr name="grid_thickness" format="dimension"/>
+        <attr name="grid_opacity" format="float"/>
+        <attr name="padding_color" format="color"/>
+    </declare-styleable>
+</resources>
