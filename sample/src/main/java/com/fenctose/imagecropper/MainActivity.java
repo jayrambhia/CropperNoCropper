@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.fenchtose.nocropper.CropperView;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -22,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_GALLERY = 21;
     private static final String TAG = "MainActivity";
 
-    @Bind(R.id.imageview) CropperView mImageView;
+    @Bind(R.id.imageview)
+    CropperView mImageView;
 
     private Bitmap mBitmap;
     private boolean isSnappedToCenter = false;

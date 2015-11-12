@@ -1,16 +1,15 @@
-package com.fenctose.imagecropper;
+package com.fenchtose.nocropper;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
-import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -52,34 +51,42 @@ public class CropperImageView extends ImageView {
     private boolean showAnimation = true;
     private boolean isAdjusting = false;
 
-    public  boolean DEBUG = true;
+    private int mPaintColor = Color.WHITE;
+
+    public  boolean DEBUG = false;
 
     public CropperImageView(Context context) {
         super(context);
-        init(context);
+        init(context, null);
     }
 
     public CropperImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context);
+        init(context, attrs);
     }
 
     public CropperImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context);
+        init(context, attrs);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public CropperImageView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init(context);
+        init(context, attrs);
     }
 
     public void setDEBUG(boolean DEBUG) {
         this.DEBUG = DEBUG;
     }
 
-    private void init(Context context) {
+    private void init(Context context, AttributeSet attrs) {
+
+        if (attrs != null) {
+            TypedArray mTypedArray = context.obtainStyledAttributes(attrs, R.styleable.CropperView);
+            mPaintColor = mTypedArray.getColor(R.styleable.CropperView_padding_color, mPaintColor);
+        }
+
         mGestureListener = new GestureListener();
         mGestureDetector = new GestureDetector(context, mGestureListener, null, true);
         mScaleListener = new ScaleListener();
@@ -158,36 +165,6 @@ public class CropperImageView extends ImageView {
     }
 
     @Override
-    public void setImageIcon(Icon icon) {
-        Log.w(TAG, "setImageIcon is not supported yet. Use setImageBitmap");
-        mFirstRender = true;
-        super.setImageIcon(icon);
-    }
-
-    @Override
-    public void setImageURI(Uri uri) {
-        Log.w(TAG, "setImageURI is not supported yet. Use setImageBitmap");
-        mFirstRender = true;
-        super.setImageURI(uri);
-    }
-
-    @Override
-    public void setImageResource(int resId) {
-        Log.w(TAG, "setImageResource is not supported yet. Use setImageBitmap");
-        mFirstRender = true;
-        super.setImageResource(resId);
-    }
-
-    @Override
-    public void setImageDrawable(Drawable drawable) {
-
-        Log.w(TAG, "setImageDrawable is not supported yet. Use setImageBitmap");
-
-        mFirstRender = true;
-        super.setImageDrawable(drawable);
-    }
-
-    @Override
     public void setImageBitmap(Bitmap bm) {
         mFirstRender = true;
         if (bm == null) {
@@ -216,7 +193,14 @@ public class CropperImageView extends ImageView {
         requestLayout();
     }
 
-    private void cropToCenter(@NonNull Drawable drawable, int frameDimen) {
+    private void cropToCenter(Drawable drawable, int frameDimen) {
+
+        if (drawable == null) {
+            if (DEBUG) {
+                Log.e(TAG, "Drawable is null. I can't fit anything");
+            }
+            return;
+        }
 
         if (frameDimen == 0) {
             if (DEBUG) {
@@ -241,7 +225,14 @@ public class CropperImageView extends ImageView {
         setImageMatrix(matrix);
     }
 
-    private void fitToCenter(@NonNull Drawable drawable, int frameDimen) {
+    private void fitToCenter(Drawable drawable, int frameDimen) {
+
+        if (drawable == null) {
+            if (DEBUG) {
+                Log.e(TAG, "Drawable is null. I can't fit anything");
+            }
+            return;
+        }
 
         if (frameDimen == 0) {
             if (DEBUG) {
@@ -531,7 +522,7 @@ public class CropperImageView extends ImageView {
         if (xTrans > 0 && yTrans > 0 && scale <= mMinZoom) {
             // No scale/crop required.
             // Add padding if not square
-            bitmap = BitmapUtils.addPadding(mBitmap);
+            bitmap = BitmapUtils.addPadding(mBitmap, mPaintColor);
         } else {
 
             float cropY = - yTrans / scale;
@@ -555,7 +546,7 @@ public class CropperImageView extends ImageView {
                     // Image is zoomed. Crop from height and add padding to make square
                     bitmap = Bitmap.createBitmap(mBitmap, 0, (int)cropY, mBitmap.getWidth(), (int)Y,
                             null, true);
-                    bitmap = BitmapUtils.addPadding(bitmap);
+                    bitmap = BitmapUtils.addPadding(bitmap, mPaintColor);
 
                 } else {
                     // Crop from width and height both
@@ -567,7 +558,7 @@ public class CropperImageView extends ImageView {
                     // Image is zoomed. Crop from width and add padding to make square
                     bitmap = Bitmap.createBitmap(mBitmap, (int)cropX, 0, (int)X, mBitmap.getHeight(),
                             null, true);
-                    bitmap = BitmapUtils.addPadding(bitmap);
+                    bitmap = BitmapUtils.addPadding(bitmap, mPaintColor);
 
                 } else {
                     // Crop from width and height both.
@@ -592,6 +583,14 @@ public class CropperImageView extends ImageView {
 
     public void setShowAnimation(boolean showAnimation) {
         this.showAnimation = showAnimation;
+    }
+
+    public int getPaddingColor() {
+        return mPaintColor;
+    }
+
+    public void setPaddingColor(int mPaintColor) {
+        this.mPaintColor = mPaintColor;
     }
 
     // Scroll and Gesture Listeners
