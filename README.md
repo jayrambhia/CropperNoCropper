@@ -1,6 +1,12 @@
 ## Cropper - NoCropper
 
-This is a demo project which replicates Instagram's new cropper.
+This is a demo project which replicates Instagram's new cropper. 
+
+Here's a short gif showing how it works.
+
+![Demo](https://raw.githubusercontent.com/jayrambhia/CropperNoCropper/master/art/demo1.gif)
+
+And, here's a bit longer [YouTube Video](https://youtu.be/OoYSt2vtdNs)
 
 ### CropperView
 
