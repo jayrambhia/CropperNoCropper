@@ -1,6 +1,9 @@
 ## Cropper - NoCropper
 
-This is a demo project which replicates Instagram's new cropper. 
+This is a lightweight Image Cropper for Android which also supports no-crop feature.
+
+**[Project Page](http://www.jayrambhia.com/project/nocropper/)**
+**[Blogpost](http://www.jayrambhia.com/blog/cropper/)**
 
 Here's a short gif showing how it works.
 
@@ -8,13 +11,15 @@ Here's a short gif showing how it works.
 
 And, here's a bit longer [YouTube Video](https://youtu.be/OoYSt2vtdNs)
 
-### CropperView
+## CropperView
 
 It's a FrameLayout which contains a view for Grid and an imageview. This project supports only square cropping.
 CropperView contains some basic methods like `setImageBitmap()`, `setMaxZoom()`, `setMinZoom()`, etc which are
 forwarded to `CropperImageView`.
 
-### How To Install
+## How To Install
+
+### Maven
 
     repositories {
         maven {
@@ -22,11 +27,19 @@ forwarded to `CropperImageView`.
         }
     }
 
+### JCenter
+
+    repositories {
+        jcenter()
+    }
+
+### Dependency
+
     dependencies {
         compile 'com.fenchtose.nocropper:nocropper:0.1.1'
     }
 
-### CropperImageView
+## CropperImageView
 
 It's a square ImageView which acts as the cropper. It tries to keep the image in the range of max and min zoom.
 It automatically adjusts the position of the image, if it's zoomed out.
@@ -45,3 +58,10 @@ It automatically adjusts the position of the image, if it's zoomed out.
  - `grid_thickness` - Thickness of grid lines
  - `grid_opacity` - Opacity of grid lines
  - `padding_color` - Color of the image padding
+
+## Licenses and Release History
+
+**[CHANGELOG](https://github.com/jayrambhia/CropperNoCropper/blob/master/Changelog.md)**
+
+NoCropper binaries and source code can be used according to the [Apache License, Version 2.0](https://github.com/jayrambhia/CropperNoCropper/blob/master/License).
+

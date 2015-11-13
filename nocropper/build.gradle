@@ -14,7 +14,7 @@ android {
     resourcePrefix "nocropper__"
 
     defaultConfig {
-        minSdkVersion 1
+        minSdkVersion 11
         targetSdkVersion 23
         versionCode 1
         versionName version
