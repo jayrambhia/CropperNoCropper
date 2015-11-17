@@ -282,10 +282,11 @@ public class CropperImageView extends ImageView {
 
         if (DEBUG) {
             Log.i(TAG, "onUp: " + tx + " " + ty);
-            Log.i(TAG, scaleX + " " + scaleY);
-            Log.i(TAG, getWidth() + " " + getHeight());
-            Log.i(TAG, drawable.getIntrinsicWidth() + " " + drawable.getIntrinsicHeight());
-            Log.i(TAG, scaleX * drawable.getIntrinsicWidth() + " " + scaleY * drawable.getIntrinsicHeight());
+            Log.i(TAG, "scale: " + scaleX);
+            Log.i(TAG, "min, max, base zoom: " + mMinZoom + ", " + mMaxZoom + ", " + mBaseZoom);
+            Log.i(TAG, "imageview size: " + getWidth() + " " + getHeight());
+            Log.i(TAG, "drawable size: " + drawable.getIntrinsicWidth() + " " + drawable.getIntrinsicHeight());
+            Log.i(TAG, "scaled drawable size: " + scaleX * drawable.getIntrinsicWidth() + " " + scaleY * drawable.getIntrinsicHeight());
         }
 
         if (scaleX <= mMinZoom) {
@@ -369,6 +370,11 @@ public class CropperImageView extends ImageView {
 
         } else if (isMaxZoomSet && scaleX > mMaxZoom) {
 
+            if(DEBUG) {
+                Log.i(TAG, "set to max zoom");
+                Log.i(TAG, "isMaxZoomSet: " + isMaxZoomSet);
+            }
+
             if (showAnimation()) {
                 animateOverMaxZoomAdjustment();
 //                adjustToSides();
@@ -381,6 +387,9 @@ public class CropperImageView extends ImageView {
             return true;
         }
 
+        if (DEBUG) {
+            Log.i(TAG, "adjust to sides");
+        }
         adjustToSides();
         return true;
     }
@@ -468,6 +477,12 @@ public class CropperImageView extends ImageView {
     }
 
     public void setMaxZoom(float mMaxZoom) {
+
+        if (mMaxZoom <= 0) {
+            Log.e(TAG, "Max zoom must be greater than 0");
+            return;
+        }
+
         this.mMaxZoom = mMaxZoom;
         isMaxZoomSet = true;
     }
@@ -477,6 +492,11 @@ public class CropperImageView extends ImageView {
     }
 
     public void setMinZoom(float mMInZoom) {
+        if (mMInZoom <= 0) {
+            Log.e(TAG, "Min zoom must be greater than 0");
+            return;
+        }
+
         this.mMinZoom = mMInZoom;
     }
 
@@ -538,7 +558,7 @@ public class CropperImageView extends ImageView {
             }
 
             Matrix matrix1 = new Matrix();
-            matrix1.setScale(1/scale, 1/scale);
+            matrix1.setScale(1 / scale, 1 / scale);
 
             if (mBitmap.getHeight() > mBitmap.getWidth()) {
                 // Height is greater than width.
@@ -591,6 +611,13 @@ public class CropperImageView extends ImageView {
 
     public void setPaddingColor(int mPaintColor) {
         this.mPaintColor = mPaintColor;
+    }
+
+    public void release() {
+        setImageBitmap(null);
+        if (mBitmap != null) {
+            mBitmap.recycle();
+        }
     }
 
     // Scroll and Gesture Listeners

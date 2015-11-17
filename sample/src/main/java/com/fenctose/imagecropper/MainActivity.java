@@ -8,6 +8,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ViewTreeObserver;
 
 import com.fenchtose.nocropper.CropperView;
 
@@ -64,7 +65,21 @@ public class MainActivity extends AppCompatActivity {
         int maxP = Math.max(mBitmap.getWidth(), mBitmap.getHeight());
         float scale1280 = (float)maxP / 1280;
 
-        mImageView.setMaxZoom(mImageView.getWidth()*2/1280f);
+        if (mImageView.getWidth() != 0) {
+            mImageView.setMaxZoom(mImageView.getWidth() * 2 / 1280f);
+        } else {
+
+            ViewTreeObserver vto = mImageView.getViewTreeObserver();
+            vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    mImageView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    mImageView.setMaxZoom(mImageView.getWidth() * 2 / 1280f);
+                    return true;
+                }
+            });
+
+        }
 
         mBitmap = Bitmap.createScaledBitmap(mBitmap, (int)(mBitmap.getWidth()/scale1280),
                 (int)(mBitmap.getHeight()/scale1280), true);
