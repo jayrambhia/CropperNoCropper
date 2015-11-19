@@ -15,7 +15,7 @@
             android:background="#ff282828"
             android:id="@+id/imageview"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             app:grid_opacity="0.8"
             app:grid_thickness="0.8dp"
             app:grid_color="@color/colorAccent"/>

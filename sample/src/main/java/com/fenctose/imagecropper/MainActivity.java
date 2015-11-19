@@ -1,6 +1,7 @@
 package com.fenctose.imagecropper;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
@@ -34,8 +35,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            setContentView(R.layout.activity_main_portrait);
+        } else {
+            Log.i(TAG, "Set landscape mode");
+            setContentView(R.layout.activity_main_landscape);
+        }
         ButterKnife.bind(this);
+        mImageView.setDebug(true);
     }
 
     @OnClick(R.id.image_button)

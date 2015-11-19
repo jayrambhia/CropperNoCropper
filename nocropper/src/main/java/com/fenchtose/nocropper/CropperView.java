@@ -2,6 +2,7 @@ package com.fenchtose.nocropper;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -45,14 +46,38 @@ public class CropperView extends FrameLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(getMeasuredWidth(), getMeasuredWidth());
+
+        int orientation = getContext().getResources().getConfiguration().orientation;
+
+        if (orientation == Configuration.ORIENTATION_PORTRAIT ||
+                orientation == Configuration.ORIENTATION_UNDEFINED) {
+
+            int width = MeasureSpec.getSize(widthMeasureSpec);
+            int height = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
+            setMeasuredDimension(width, height);
+
+        } else {
+
+            int height = MeasureSpec.getSize(heightMeasureSpec);
+            int width = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+            setMeasuredDimension(width, height);
+
+        }
+
     }
 
     private void init(Context context, AttributeSet attrs) {
         mImageView = new CropperImageView(context, attrs);
         mGridView = new CropperGridView(context, attrs);
+
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 0);
+
+        if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            params.width = 0;
+            params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+        }
+
         addView(mImageView, 0, params);
         addView(mGridView, 1, params);
 

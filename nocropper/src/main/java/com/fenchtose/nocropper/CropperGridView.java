@@ -2,6 +2,7 @@ package com.fenchtose.nocropper;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -55,7 +56,22 @@ public class CropperGridView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(getMeasuredWidth(), getMeasuredWidth());
+        int orientation = getContext().getResources().getConfiguration().orientation;
+
+        if (orientation == Configuration.ORIENTATION_PORTRAIT ||
+                orientation == Configuration.ORIENTATION_UNDEFINED) {
+
+            int width = MeasureSpec.getSize(widthMeasureSpec);
+            int height = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
+            setMeasuredDimension(width, height);
+
+        } else {
+
+            int height = MeasureSpec.getSize(heightMeasureSpec);
+            int width = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+            setMeasuredDimension(width, height);
+
+        }
     }
 
     private void init(Context context, AttributeSet attrs) {
