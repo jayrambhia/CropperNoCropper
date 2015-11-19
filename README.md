@@ -36,7 +36,7 @@ forwarded to `CropperImageView`.
 ### Dependency
 
     dependencies {
-        compile 'com.fenchtose.nocropper:nocropper:0.1.1'
+        compile 'com.fenchtose.nocropper:nocropper:0.1.2'
     }
 
 ## CropperImageView

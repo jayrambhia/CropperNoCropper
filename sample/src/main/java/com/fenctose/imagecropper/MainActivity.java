@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
             setContentView(R.layout.activity_main_landscape);
         }
         ButterKnife.bind(this);
-        mImageView.setDebug(true);
+//        mImageView.setDebug(true);
     }
 
     @OnClick(R.id.image_button)
