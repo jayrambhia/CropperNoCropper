@@ -547,7 +547,7 @@ public class CropperImageView extends ImageView {
         float scale = getMatrixValue(matrix, Matrix.MSCALE_X);
 
         if (DEBUG) {
-            Log.i(TAG, "x: " + xTrans + ", y: " + yTrans + " , scale: " + scale);
+            Log.i(TAG, "xTrans: " + xTrans + ", yTrans: " + yTrans + " , scale: " + scale);
         }
 
         Bitmap bitmap;
@@ -573,8 +573,29 @@ public class CropperImageView extends ImageView {
                 Log.i(TAG, "X: " + X);
             }
 
-            Matrix matrix1 = new Matrix();
-            matrix1.setScale(1 / scale, 1 / scale);
+            if (cropY + Y > mBitmap.getHeight()) {
+                cropY = mBitmap.getHeight() - Y;
+                if (DEBUG) {
+                    Log.i(TAG, "readjust cropY to: " + cropY);
+                }
+            }  else if (cropY < 0) {
+                cropY = 0;
+                if (DEBUG) {
+                    Log.i(TAG, "readjust cropY to: " + cropY);
+                }
+            }
+
+            if (cropX + X > mBitmap.getWidth()) {
+                cropX = mBitmap.getWidth() - X;
+                if (DEBUG) {
+                    Log.i(TAG, "readjust cropX to: " + cropX);
+                }
+            } else if (cropX < 0) {
+                cropX = 0;
+                if (DEBUG) {
+                    Log.i(TAG, "readjust cropX to: " + cropX);
+                }
+            }
 
             if (mBitmap.getHeight() > mBitmap.getWidth()) {
                 // Height is greater than width.
