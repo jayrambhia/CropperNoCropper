@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         int maxP = Math.max(mBitmap.getWidth(), mBitmap.getHeight());
         float scale1280 = (float)maxP / 1280;
 
-        /*if (mImageView.getWidth() != 0) {
+        if (mImageView.getWidth() != 0) {
             mImageView.setMaxZoom(mImageView.getWidth() * 2 / 1280f);
         } else {
 
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-        }*/
+        }
 
         mBitmap = Bitmap.createScaledBitmap(mBitmap, (int)(mBitmap.getWidth()/scale1280),
                 (int)(mBitmap.getHeight()/scale1280), true);
