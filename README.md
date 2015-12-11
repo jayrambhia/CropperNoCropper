@@ -36,7 +36,7 @@ forwarded to `CropperImageView`.
 ### Dependency
 
     dependencies {
-        compile 'com.fenchtose.nocropper:nocropper:0.1.3'
+        compile 'com.fenchtose.nocropper:nocropper:0.1.4'
     }
 
 ## CropperImageView
@@ -51,6 +51,8 @@ It automatically adjusts the position of the image, if it's zoomed out.
  - `setImageBitmap(Bitmap bm)` set Bitmap
  - `cropToCenter()` - Set Image in the center with square crop view
  - `fitToCenter()` - Fit Image in the center (no cropping view)
+ - `setPaddingColor(int color)` - Set Color of square image padding
+ - `setMakeSquare(boolean status)` - If you want to add padding in the cropped image (if cropped image is not square)
 
 ### Styleables
 
@@ -58,6 +60,7 @@ It automatically adjusts the position of the image, if it's zoomed out.
  - `grid_thickness` - Thickness of grid lines
  - `grid_opacity` - Opacity of grid lines
  - `padding_color` - Color of the image padding
+ - `add_padding_to_make_square` - boolean
 
 ## Licenses and Release History
 
