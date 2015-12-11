@@ -48,8 +48,6 @@ public class CropperImageView extends ImageView {
     private float mPreScale;
 
     private boolean mAddPaddingToMakeSquare = true;
-    private boolean isTapToZoomEnabled = true;
-    private boolean isPinchToZoomEnabled = true;
 
     private GestureCallback mGestureCallback;
 
@@ -59,10 +57,6 @@ public class CropperImageView extends ImageView {
     private int mPaintColor = Color.WHITE;
 
     public boolean DEBUG = false;
-
-    private float mPrevTransX;
-    private float mPrevTransY;
-    private float mPrevScale;
 
     public CropperImageView(Context context) {
         super(context);
@@ -153,10 +147,6 @@ public class CropperImageView extends ImageView {
                 cropToCenter(drawable, bottom - top);
                 mFirstRender = false;
 
-                Matrix matrix = getImageMatrix();
-                mPrevTransX = getMatrixValue(matrix, Matrix.MTRANS_X);
-                mPrevTransY = getMatrixValue(matrix, Matrix.MTRANS_Y);
-                mPreScale = getScale(matrix);
             }
         }
 
@@ -175,12 +165,6 @@ public class CropperImageView extends ImageView {
             if (mGestureCallback != null) {
                 mGestureCallback.onGestureStarted();
             }
-
-            Matrix matrix = getImageMatrix();
-            mPrevTransX = getMatrixValue(matrix, Matrix.MTRANS_X);
-            mPrevTransY = getMatrixValue(matrix, Matrix.MTRANS_Y);
-            mPrevScale = getScale(matrix);
-
         }
 
         mScaleDetector.onTouchEvent(event);
@@ -319,15 +303,6 @@ public class CropperImageView extends ImageView {
         float ty = getMatrixValue(matrix, Matrix.MTRANS_Y);
         float scaleX = getMatrixValue(matrix, Matrix.MSCALE_X);
         float scaleY = getMatrixValue(matrix, Matrix.MSCALE_Y);
-
-        Log.i(TAG, "diff: " + (mPrevTransX - tx) + ", " + (mPrevTransY - ty) + ", " + (mPrevScale - scaleX));
-
-        boolean chnageRequired = true;
-        if (tx > mPrevTransX - 1 && tx < mPrevTransY + 1 && ty > mPrevTransY - 1 && ty < mPrevTransY + 1
-                && mPrevScale > scaleX - 0.05 && mPrevScale < scaleX + 0.05) {
-            chnageRequired = false;
-            return false;
-        }
 
         if (DEBUG) {
             Log.i(TAG, "onUp: " + tx + " " + ty);
@@ -724,75 +699,7 @@ public class CropperImageView extends ImageView {
             return false;
         }
 
-        @Override
-        public boolean onDoubleTap(MotionEvent e) {
-
-//            if (DEBUG) {
-                Log.i(TAG, "onDoubleTap: " + e);
-//            }
-
-            if (isTapToZoomEnabled) {
-
-                if (!isMaxZoomSet || mMaxZoom <= 0) {
-                    Log.e(TAG, "Max zoom is not set. Unable to perform tap to zoom");
-                    return super.onDoubleTap(e);
-                }
-
-                Matrix matrix = getImageMatrix();
-                float currentScale = getScale(matrix);
-
-//                if (DEBUG) {
-                    Log.i(TAG, "current scale: " + currentScale);
-                    Log.i(TAG, "max zoom: " + mMaxZoom);
-//                }
-
-                // current scale is set to max zoom. Change it to minzoom.
-                if (currentScale > mMaxZoom - 0.15 && currentScale < mMaxZoom + 0.15) {
-                    if (mMinZoom <= 0) {
-                        Log.e(TAG, "min zoom is not set. Unable to perform tap to zoom");
-                        return super.onDoubleTap(e);
-                    }
-
-                    mFocusX = e.getX();
-                    mFocusY = e.getY();
-
-                    float postScaleFactor = mMinZoom/currentScale;
-
-                    matrix.postScale(postScaleFactor, postScaleFactor,
-                            mFocusX, mFocusY);
-
-                    setImageMatrix(matrix);
-                    invalidate();
-
-                    return super.onDoubleTap(e);
-                } else {
-                    // set to max zoom
-                    mFocusX = e.getX();
-                    mFocusY = e.getY();
-
-                    float postScaleFactor = mMaxZoom/currentScale;
-
-                    matrix.postScale(postScaleFactor, postScaleFactor,
-                            mFocusX, mFocusY);
-
-                    setImageMatrix(matrix);
-                    invalidate();
-
-                    return super.onDoubleTap(e);
-                }
-            }
-            return super.onDoubleTap(e);
-        }
     }
-
-    /*@Override
-    public void setImageMatrix(Matrix matrix) {
-        mPrevTransX = getMatrixValue(matrix, Matrix.MTRANS_X);
-        mPrevTransY = getMatrixValue(matrix, Matrix.MTRANS_Y);
-        mPrevScale = getScale(matrix);
-
-        super.setImageMatrix(matrix);
-    }*/
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         protected boolean mScaled = false;
