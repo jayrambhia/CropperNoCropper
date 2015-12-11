@@ -47,6 +47,10 @@ public class CropperImageView extends ImageView {
     private boolean doPreScaling = false;
     private float mPreScale;
 
+    private boolean mAddPaddingToMakeSquare = true;
+    private boolean isTapToZoomEnabled = true;
+    private boolean isPinchToZoomEnabled = true;
+
     private GestureCallback mGestureCallback;
 
     private boolean showAnimation = true;
@@ -54,7 +58,11 @@ public class CropperImageView extends ImageView {
 
     private int mPaintColor = Color.WHITE;
 
-    public  boolean DEBUG = false;
+    public boolean DEBUG = false;
+
+    private float mPrevTransX;
+    private float mPrevTransY;
+    private float mPrevScale;
 
     public CropperImageView(Context context) {
         super(context);
@@ -86,6 +94,7 @@ public class CropperImageView extends ImageView {
         if (attrs != null) {
             TypedArray mTypedArray = context.obtainStyledAttributes(attrs, R.styleable.CropperView);
             mPaintColor = mTypedArray.getColor(R.styleable.CropperView_padding_color, mPaintColor);
+            mAddPaddingToMakeSquare = mTypedArray.getBoolean(R.styleable.CropperView_add_padding_to_make_square, true);
         }
 
         mGestureListener = new GestureListener();
@@ -143,6 +152,11 @@ public class CropperImageView extends ImageView {
 
                 cropToCenter(drawable, bottom - top);
                 mFirstRender = false;
+
+                Matrix matrix = getImageMatrix();
+                mPrevTransX = getMatrixValue(matrix, Matrix.MTRANS_X);
+                mPrevTransY = getMatrixValue(matrix, Matrix.MTRANS_Y);
+                mPreScale = getScale(matrix);
             }
         }
 
@@ -152,13 +166,21 @@ public class CropperImageView extends ImageView {
     public boolean onTouchEvent(MotionEvent event) {
 
         if (isAdjusting) {
-            return false;
+            return true;
         }
 
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+        final int action = event.getActionMasked();
+
+        if (action == MotionEvent.ACTION_DOWN) {
             if (mGestureCallback != null) {
                 mGestureCallback.onGestureStarted();
             }
+
+            Matrix matrix = getImageMatrix();
+            mPrevTransX = getMatrixValue(matrix, Matrix.MTRANS_X);
+            mPrevTransY = getMatrixValue(matrix, Matrix.MTRANS_Y);
+            mPrevScale = getScale(matrix);
+
         }
 
         mScaleDetector.onTouchEvent(event);
@@ -173,6 +195,7 @@ public class CropperImageView extends ImageView {
                 if(mGestureCallback != null) {
                     mGestureCallback.onGestureCompleted();
                 }
+
                 return onUp(event);
 
         }
@@ -284,6 +307,12 @@ public class CropperImageView extends ImageView {
     }
 
     private boolean onUp(MotionEvent event) {
+
+        Drawable drawable = getDrawable();
+        if (drawable == null) {
+            return false;
+        }
+
         // If over scrolled, return back to the place.
         Matrix matrix = getImageMatrix();
         float tx = getMatrixValue(matrix, Matrix.MTRANS_X);
@@ -291,8 +320,12 @@ public class CropperImageView extends ImageView {
         float scaleX = getMatrixValue(matrix, Matrix.MSCALE_X);
         float scaleY = getMatrixValue(matrix, Matrix.MSCALE_Y);
 
-        Drawable drawable = getDrawable();
-        if (drawable == null) {
+        Log.i(TAG, "diff: " + (mPrevTransX - tx) + ", " + (mPrevTransY - ty) + ", " + (mPrevScale - scaleX));
+
+        boolean chnageRequired = true;
+        if (tx > mPrevTransX - 1 && tx < mPrevTransY + 1 && ty > mPrevTransY - 1 && ty < mPrevTransY + 1
+                && mPrevScale > scaleX - 0.05 && mPrevScale < scaleX + 0.05) {
+            chnageRequired = false;
             return false;
         }
 
@@ -558,7 +591,12 @@ public class CropperImageView extends ImageView {
         if (xTrans > 0 && yTrans > 0 && scale <= mMinZoom) {
             // No scale/crop required.
             // Add padding if not square
-            bitmap = BitmapUtils.addPadding(mBitmap, mPaintColor);
+            if (mAddPaddingToMakeSquare) {
+                return BitmapUtils.addPadding(mBitmap, mPaintColor);
+            } else {
+                return mBitmap;
+            }
+
         } else {
 
             float cropY = - yTrans / scale;
@@ -603,7 +641,10 @@ public class CropperImageView extends ImageView {
                     // Image is zoomed. Crop from height and add padding to make square
                     bitmap = Bitmap.createBitmap(mBitmap, 0, (int)cropY, mBitmap.getWidth(), (int)Y,
                             null, true);
-                    bitmap = BitmapUtils.addPadding(bitmap, mPaintColor);
+
+                    if (mAddPaddingToMakeSquare) {
+                        bitmap = BitmapUtils.addPadding(bitmap, mPaintColor);
+                    }
 
                 } else {
                     // Crop from width and height both
@@ -615,7 +656,10 @@ public class CropperImageView extends ImageView {
                     // Image is zoomed. Crop from width and add padding to make square
                     bitmap = Bitmap.createBitmap(mBitmap, (int)cropX, 0, (int)X, mBitmap.getHeight(),
                             null, true);
-                    bitmap = BitmapUtils.addPadding(bitmap, mPaintColor);
+
+                    if (mAddPaddingToMakeSquare) {
+                        bitmap = BitmapUtils.addPadding(bitmap, mPaintColor);
+                    }
 
                 } else {
                     // Crop from width and height both.
@@ -650,6 +694,14 @@ public class CropperImageView extends ImageView {
         this.mPaintColor = mPaintColor;
     }
 
+    public boolean isMakeSquare() {
+        return mAddPaddingToMakeSquare;
+    }
+
+    public void setMakeSquare(boolean mAddPaddingToMakeSquare) {
+        this.mAddPaddingToMakeSquare = mAddPaddingToMakeSquare;
+    }
+
     public void release() {
         setImageBitmap(null);
         if (mBitmap != null) {
@@ -671,7 +723,76 @@ public class CropperImageView extends ImageView {
             CropperImageView.this.onScroll(e1, e2, distanceX, distanceY);
             return false;
         }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+
+//            if (DEBUG) {
+                Log.i(TAG, "onDoubleTap: " + e);
+//            }
+
+            if (isTapToZoomEnabled) {
+
+                if (!isMaxZoomSet || mMaxZoom <= 0) {
+                    Log.e(TAG, "Max zoom is not set. Unable to perform tap to zoom");
+                    return super.onDoubleTap(e);
+                }
+
+                Matrix matrix = getImageMatrix();
+                float currentScale = getScale(matrix);
+
+//                if (DEBUG) {
+                    Log.i(TAG, "current scale: " + currentScale);
+                    Log.i(TAG, "max zoom: " + mMaxZoom);
+//                }
+
+                // current scale is set to max zoom. Change it to minzoom.
+                if (currentScale > mMaxZoom - 0.15 && currentScale < mMaxZoom + 0.15) {
+                    if (mMinZoom <= 0) {
+                        Log.e(TAG, "min zoom is not set. Unable to perform tap to zoom");
+                        return super.onDoubleTap(e);
+                    }
+
+                    mFocusX = e.getX();
+                    mFocusY = e.getY();
+
+                    float postScaleFactor = mMinZoom/currentScale;
+
+                    matrix.postScale(postScaleFactor, postScaleFactor,
+                            mFocusX, mFocusY);
+
+                    setImageMatrix(matrix);
+                    invalidate();
+
+                    return super.onDoubleTap(e);
+                } else {
+                    // set to max zoom
+                    mFocusX = e.getX();
+                    mFocusY = e.getY();
+
+                    float postScaleFactor = mMaxZoom/currentScale;
+
+                    matrix.postScale(postScaleFactor, postScaleFactor,
+                            mFocusX, mFocusY);
+
+                    setImageMatrix(matrix);
+                    invalidate();
+
+                    return super.onDoubleTap(e);
+                }
+            }
+            return super.onDoubleTap(e);
+        }
     }
+
+    /*@Override
+    public void setImageMatrix(Matrix matrix) {
+        mPrevTransX = getMatrixValue(matrix, Matrix.MTRANS_X);
+        mPrevTransY = getMatrixValue(matrix, Matrix.MTRANS_Y);
+        mPrevScale = getScale(matrix);
+
+        super.setImageMatrix(matrix);
+    }*/
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         protected boolean mScaled = false;

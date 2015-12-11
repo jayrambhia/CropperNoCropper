@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ImageCropper.iml" filepath="$PROJECT_DIR$/ImageCropper.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CropperNoCropper.iml" filepath="$PROJECT_DIR$/CropperNoCropper.iml" />
       <module fileurl="file://$PROJECT_DIR$/nocropper/nocropper.iml" filepath="$PROJECT_DIR$/nocropper/nocropper.iml" />
       <module fileurl="file://$PROJECT_DIR$/sample/sample.iml" filepath="$PROJECT_DIR$/sample/sample.iml" />
     </modules>
