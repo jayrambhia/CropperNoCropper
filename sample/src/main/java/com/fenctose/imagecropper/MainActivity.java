@@ -1,20 +1,25 @@
 package com.fenctose.imagecropper;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewTreeObserver;
+import android.widget.Toast;
 
 import com.fenchtose.nocropper.CropperView;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.jar.Manifest;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -22,7 +27,7 @@ import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
-
+    private static final int REQUEST_CODE_READ_PERMISSION = 22;
     private static final int REQUEST_GALLERY = 21;
     private static final String TAG = "MainActivity";
 
@@ -42,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
             setContentView(R.layout.activity_main_landscape);
         }
         ButterKnife.bind(this);
-//        mImageView.setDebug(true);
+        mImageView.setDebug(true);
     }
 
     @OnClick(R.id.image_button)
@@ -66,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadNewImage(String filePath) {
+        Log.i(TAG, "load image: " + filePath);
         mBitmap = BitmapFactory.decodeFile(filePath);
         Log.i(TAG, "bitmap: " + mBitmap.getWidth() + " " + mBitmap.getHeight());
 
@@ -94,8 +100,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startGalleryIntent() {
+
+        if (!hasGalleryPermission()) {
+            askForGalleryPermission();
+            return;
+        }
+
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, REQUEST_GALLERY);
+    }
+
+    private boolean hasGalleryPermission() {
+        return ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void askForGalleryPermission() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                REQUEST_CODE_READ_PERMISSION);
     }
 
     @Override
@@ -106,6 +130,19 @@ public class MainActivity extends AppCompatActivity {
             String absPath = BitmapUtils.getFilePathFromUri(this, resultIntent.getData());
             loadNewImage(absPath);
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_CODE_READ_PERMISSION) {
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startGalleryIntent();
+                return;
+            }
+        }
+
+        Toast.makeText(this, "Gallery permission not granted", Toast.LENGTH_SHORT).show();
     }
 
     private void cropImage() {
