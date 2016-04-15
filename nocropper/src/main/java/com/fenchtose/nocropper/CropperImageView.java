@@ -47,6 +47,8 @@ public class CropperImageView extends ImageView {
     private boolean doPreScaling = false;
     private float mPreScale;
 
+    private boolean mAddPaddingToMakeSquare = true;
+
     private GestureCallback mGestureCallback;
 
     private boolean showAnimation = true;
@@ -54,7 +56,7 @@ public class CropperImageView extends ImageView {
 
     private int mPaintColor = Color.WHITE;
 
-    public  boolean DEBUG = false;
+    public boolean DEBUG = false;
 
     public CropperImageView(Context context) {
         super(context);
@@ -86,6 +88,7 @@ public class CropperImageView extends ImageView {
         if (attrs != null) {
             TypedArray mTypedArray = context.obtainStyledAttributes(attrs, R.styleable.CropperView);
             mPaintColor = mTypedArray.getColor(R.styleable.CropperView_padding_color, mPaintColor);
+            mAddPaddingToMakeSquare = mTypedArray.getBoolean(R.styleable.CropperView_add_padding_to_make_square, true);
         }
 
         mGestureListener = new GestureListener();
@@ -143,6 +146,7 @@ public class CropperImageView extends ImageView {
 
                 cropToCenter(drawable, bottom - top);
                 mFirstRender = false;
+
             }
         }
 
@@ -152,10 +156,12 @@ public class CropperImageView extends ImageView {
     public boolean onTouchEvent(MotionEvent event) {
 
         if (isAdjusting) {
-            return false;
+            return true;
         }
 
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+        final int action = event.getActionMasked();
+
+        if (action == MotionEvent.ACTION_DOWN) {
             if (mGestureCallback != null) {
                 mGestureCallback.onGestureStarted();
             }
@@ -173,6 +179,7 @@ public class CropperImageView extends ImageView {
                 if(mGestureCallback != null) {
                     mGestureCallback.onGestureCompleted();
                 }
+
                 return onUp(event);
 
         }
@@ -284,17 +291,18 @@ public class CropperImageView extends ImageView {
     }
 
     private boolean onUp(MotionEvent event) {
+
+        Drawable drawable = getDrawable();
+        if (drawable == null) {
+            return false;
+        }
+
         // If over scrolled, return back to the place.
         Matrix matrix = getImageMatrix();
         float tx = getMatrixValue(matrix, Matrix.MTRANS_X);
         float ty = getMatrixValue(matrix, Matrix.MTRANS_Y);
         float scaleX = getMatrixValue(matrix, Matrix.MSCALE_X);
         float scaleY = getMatrixValue(matrix, Matrix.MSCALE_Y);
-
-        Drawable drawable = getDrawable();
-        if (drawable == null) {
-            return false;
-        }
 
         if (DEBUG) {
             Log.i(TAG, "onUp: " + tx + " " + ty);
@@ -547,7 +555,7 @@ public class CropperImageView extends ImageView {
         float scale = getMatrixValue(matrix, Matrix.MSCALE_X);
 
         if (DEBUG) {
-            Log.i(TAG, "x: " + xTrans + ", y: " + yTrans + " , scale: " + scale);
+            Log.i(TAG, "xTrans: " + xTrans + ", yTrans: " + yTrans + " , scale: " + scale);
         }
 
         Bitmap bitmap;
@@ -558,7 +566,12 @@ public class CropperImageView extends ImageView {
         if (xTrans > 0 && yTrans > 0 && scale <= mMinZoom) {
             // No scale/crop required.
             // Add padding if not square
-            bitmap = BitmapUtils.addPadding(mBitmap, mPaintColor);
+            if (mAddPaddingToMakeSquare) {
+                return BitmapUtils.addPadding(mBitmap, mPaintColor);
+            } else {
+                return mBitmap;
+            }
+
         } else {
 
             float cropY = - yTrans / scale;
@@ -573,8 +586,29 @@ public class CropperImageView extends ImageView {
                 Log.i(TAG, "X: " + X);
             }
 
-            Matrix matrix1 = new Matrix();
-            matrix1.setScale(1 / scale, 1 / scale);
+            if (cropY + Y > mBitmap.getHeight()) {
+                cropY = mBitmap.getHeight() - Y;
+                if (DEBUG) {
+                    Log.i(TAG, "readjust cropY to: " + cropY);
+                }
+            }  else if (cropY < 0) {
+                cropY = 0;
+                if (DEBUG) {
+                    Log.i(TAG, "readjust cropY to: " + cropY);
+                }
+            }
+
+            if (cropX + X > mBitmap.getWidth()) {
+                cropX = mBitmap.getWidth() - X;
+                if (DEBUG) {
+                    Log.i(TAG, "readjust cropX to: " + cropX);
+                }
+            } else if (cropX < 0) {
+                cropX = 0;
+                if (DEBUG) {
+                    Log.i(TAG, "readjust cropX to: " + cropX);
+                }
+            }
 
             if (mBitmap.getHeight() > mBitmap.getWidth()) {
                 // Height is greater than width.
@@ -582,7 +616,10 @@ public class CropperImageView extends ImageView {
                     // Image is zoomed. Crop from height and add padding to make square
                     bitmap = Bitmap.createBitmap(mBitmap, 0, (int)cropY, mBitmap.getWidth(), (int)Y,
                             null, true);
-                    bitmap = BitmapUtils.addPadding(bitmap, mPaintColor);
+
+                    if (mAddPaddingToMakeSquare) {
+                        bitmap = BitmapUtils.addPadding(bitmap, mPaintColor);
+                    }
 
                 } else {
                     // Crop from width and height both
@@ -594,7 +631,10 @@ public class CropperImageView extends ImageView {
                     // Image is zoomed. Crop from width and add padding to make square
                     bitmap = Bitmap.createBitmap(mBitmap, (int)cropX, 0, (int)X, mBitmap.getHeight(),
                             null, true);
-                    bitmap = BitmapUtils.addPadding(bitmap, mPaintColor);
+
+                    if (mAddPaddingToMakeSquare) {
+                        bitmap = BitmapUtils.addPadding(bitmap, mPaintColor);
+                    }
 
                 } else {
                     // Crop from width and height both.
@@ -629,6 +669,14 @@ public class CropperImageView extends ImageView {
         this.mPaintColor = mPaintColor;
     }
 
+    public boolean isMakeSquare() {
+        return mAddPaddingToMakeSquare;
+    }
+
+    public void setMakeSquare(boolean mAddPaddingToMakeSquare) {
+        this.mAddPaddingToMakeSquare = mAddPaddingToMakeSquare;
+    }
+
     public void release() {
         setImageBitmap(null);
         if (mBitmap != null) {
@@ -650,6 +698,7 @@ public class CropperImageView extends ImageView {
             CropperImageView.this.onScroll(e1, e2, distanceX, distanceY);
             return false;
         }
+
     }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {

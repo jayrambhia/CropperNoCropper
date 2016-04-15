@@ -19,8 +19,6 @@ public class CropperView extends FrameLayout {
     private CropperImageView mImageView;
     private CropperGridView mGridView;
 
-    private int paddingColor;
-
     public CropperView(Context context) {
         super(context);
         init(context, null);
@@ -146,14 +144,22 @@ public class CropperView extends FrameLayout {
     }
 
     public int getPaddingColor() {
-        return paddingColor;
+        return mImageView.getPaddingColor();
     }
 
     public void setPaddingColor(int paddingColor) {
-        this.paddingColor = paddingColor;
+        mImageView.setPaddingColor(paddingColor);
     }
 
     public int getCropperWidth() {
         return mImageView != null ? mImageView.getWidth() : 0;
+    }
+
+    public boolean isMakeSquare() {
+        return mImageView.isMakeSquare();
+    }
+
+    public void setMakeSquare(boolean mAddPaddingToMakeSquare) {
+        mImageView.setMakeSquare(mAddPaddingToMakeSquare);
     }
 }
