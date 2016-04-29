@@ -49,10 +49,15 @@ It automatically adjusts the position of the image, if it's zoomed out.
  - `setMaxZoom(float zoom)` set Maximum zoom
  - `setMinZoom(float zoom)` set Minimum zoom
  - `setImageBitmap(Bitmap bm)` set Bitmap
+ - `setDebug(boolean debug)` - Debugging mode
  - `cropToCenter()` - Set Image in the center with square crop view
  - `fitToCenter()` - Fit Image in the center (no cropping view)
  - `setPaddingColor(int color)` - Set Color of square image padding
  - `setMakeSquare(boolean status)` - If you want to add padding in the cropped image (if cropped image is not square)
+ - `isMakeSquare()` - Check if cropper will give a square image or not 
+ - `getCroppedBitmap()` - Get Cropped Bitmap
+ - `release()` - Remove and Recycle Bitmap
+
 
 ### Styleables
 

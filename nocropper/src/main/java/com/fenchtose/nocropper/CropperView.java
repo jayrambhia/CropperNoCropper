@@ -118,19 +118,6 @@ public class CropperView extends FrameLayout {
         mImageView.setMinZoom(mMInZoom);
     }
 
-    private class TouchGestureCallback implements CropperImageView.GestureCallback {
-
-        @Override
-        public void onGestureStarted() {
-            mGridView.setShowGrid(true);
-        }
-
-        @Override
-        public void onGestureCompleted() {
-            mGridView.setShowGrid(false);
-        }
-    }
-
     public void cropToCenter() {
         mImageView.cropToCenter();
     }
@@ -161,5 +148,18 @@ public class CropperView extends FrameLayout {
 
     public void setMakeSquare(boolean mAddPaddingToMakeSquare) {
         mImageView.setMakeSquare(mAddPaddingToMakeSquare);
+    }
+
+    private class TouchGestureCallback implements CropperImageView.GestureCallback {
+
+        @Override
+        public void onGestureStarted() {
+            mGridView.setShowGrid(true);
+        }
+
+        @Override
+        public void onGestureCompleted() {
+            mGridView.setShowGrid(false);
+        }
     }
 }
