@@ -232,7 +232,9 @@ public class CropperImageView extends ImageView {
             Log.e(TAG, "Bitmap is of different size. Not replacing");
             return;
         }
+
         super.setImageBitmap(bitmap);
+        mBitmap = bitmap;
     }
 
     private void cropToCenter(Drawable drawable, int frameDimen) {

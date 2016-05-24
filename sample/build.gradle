@@ -26,6 +26,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.0'
     //Butterknife
     compile 'com.jakewharton:butterknife:7.0.1'
-    compile 'com.fenchtose.nocropper:nocropper:0.1.5'
-    compile project(':nocropper')
+    compile 'com.fenchtose.nocropper:nocropper:0.1.6'
+//    compile project(':nocropper')
 }

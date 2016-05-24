@@ -1,3 +1,6 @@
+### V 0.1.6 (2016-05-24)
+Fixed a bug where cropped image was still based on the original image and not replaced image.
+
 ### V 0.1.5 (2016-05-24)
 Option added for users to enable/disable gestures.
 Option added for users to replace the bitmap (without changing the matrix)
