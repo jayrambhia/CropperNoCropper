@@ -45,28 +45,38 @@
 
     </FrameLayout>
 
-
-
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="#ff212121"
         android:padding="16dp"
-        android:layout_toRightOf="@id/top_frame"
+        android:layout_marginRight="48dp"
+        android:layout_alignParentRight="true"
         android:gravity="center_vertical"
         android:orientation="vertical">
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:text="Upload Image"
             android:id="@+id/image_button"/>
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:text="Crop"
             android:id="@+id/crop_button"/>
+
+        <Button
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:text="Toggle Gesture"
+            android:id="@+id/gesture_button"/>
+
+        <Button
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:text="Replace"
+            android:id="@+id/replace_button"/>
 
     </LinearLayout>
 

@@ -6,7 +6,6 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -18,6 +17,8 @@ public class CropperView extends FrameLayout {
     private static final String TAG = "CropperView";
     private CropperImageView mImageView;
     private CropperGridView mGridView;
+
+    private boolean gestureEnabled = true;
 
     public CropperView(Context context) {
         super(context);
@@ -148,6 +149,19 @@ public class CropperView extends FrameLayout {
 
     public void setMakeSquare(boolean mAddPaddingToMakeSquare) {
         mImageView.setMakeSquare(mAddPaddingToMakeSquare);
+    }
+
+    public void replaceBitmap(Bitmap bitmap) {
+        mImageView.replaceBitmap(bitmap);
+    }
+
+    public boolean isGestureEnabled() {
+        return gestureEnabled;
+    }
+
+    public void setGestureEnabled(boolean enabled) {
+        this.gestureEnabled = enabled;
+        mImageView.setGestureEnabled(enabled);
     }
 
     private class TouchGestureCallback implements CropperImageView.GestureCallback {

@@ -70,6 +70,22 @@ public class MainActivity extends AppCompatActivity {
         snapImage();
     }
 
+    @OnClick(R.id.gesture_button)
+    public void toggleGestures() {
+        boolean enabled = mImageView.isGestureEnabled();
+        enabled = !enabled;
+        mImageView.setGestureEnabled(enabled);
+        Toast.makeText(this, "Gesture " + (enabled ? "Enabled" : "Disabled"), Toast.LENGTH_SHORT).show();
+    }
+
+    @OnClick(R.id.replace_button)
+    public void replaceImage() {
+        if (mBitmap != null) {
+            mBitmap = BitmapUtils.rotateBitmap(mBitmap, 180);
+            mImageView.replaceBitmap(mBitmap);
+        }
+    }
+
     private void loadNewImage(String filePath) {
         Log.i(TAG, "load image: " + filePath);
         mBitmap = BitmapFactory.decodeFile(filePath);

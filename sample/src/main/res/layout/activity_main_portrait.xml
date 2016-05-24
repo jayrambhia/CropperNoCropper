@@ -44,31 +44,40 @@
 
     </FrameLayout>
     
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#ff212121"
-        android:padding="16dp"
-        android:layout_below="@id/top_frame"
-        android:gravity="center_vertical"
+    <GridLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        android:rowCount="2"
+        android:layout_marginBottom="16dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
         android:orientation="horizontal">
 
         <Button
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:text="Upload Image"
             android:id="@+id/image_button"/>
 
         <Button
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:text="Crop"
             android:id="@+id/crop_button"/>
 
-    </LinearLayout>
+        <Button
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:text="Toggle Gesture"
+            android:id="@+id/gesture_button"/>
+
+        <Button
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:text="Replace"
+            android:id="@+id/replace_button"/>
+
+    </GridLayout>
 
 </RelativeLayout>

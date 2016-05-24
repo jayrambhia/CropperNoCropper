@@ -36,7 +36,7 @@ forwarded to `CropperImageView`.
 ### Dependency
 
     dependencies {
-        compile 'com.fenchtose.nocropper:nocropper:0.1.4'
+        compile 'com.fenchtose.nocropper:nocropper:0.1.5'
     }
 
 ## CropperImageView
@@ -49,6 +49,8 @@ It automatically adjusts the position of the image, if it's zoomed out.
  - `setMaxZoom(float zoom)` set Maximum zoom
  - `setMinZoom(float zoom)` set Minimum zoom
  - `setImageBitmap(Bitmap bm)` set Bitmap
+ - `replaceBitmap(Bitmap bm)` Replace Bitmap without changing the image matrix
+ - `setGestureEnabled(boolean enabled)` Enable/Disable Cropper gestures
  - `setDebug(boolean debug)` - Debugging mode
  - `cropToCenter()` - Set Image in the center with square crop view
  - `fitToCenter()` - Fit Image in the center (no cropping view)

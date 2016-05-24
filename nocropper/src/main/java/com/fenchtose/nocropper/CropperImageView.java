@@ -58,6 +58,8 @@ public class CropperImageView extends ImageView {
 
     public boolean DEBUG = false;
 
+    private boolean gestureEnabled = true;
+
     public CropperImageView(Context context) {
         super(context);
         init(context, null);
@@ -214,6 +216,23 @@ public class CropperImageView extends ImageView {
             super.setImageBitmap(bm);
         }
         requestLayout();
+    }
+
+    public void replaceBitmap(Bitmap bitmap) {
+        if (bitmap == null) {
+            throw new NullPointerException("Can not replace with null bitmap");
+        }
+
+        if (mBitmap == null) {
+            setImageBitmap(bitmap);
+            return;
+        }
+
+        if (mBitmap.getWidth() != bitmap.getWidth() || mBitmap.getHeight() != bitmap.getHeight()) {
+            Log.e(TAG, "Bitmap is of different size. Not replacing");
+            return;
+        }
+        super.setImageBitmap(bitmap);
     }
 
     private void cropToCenter(Drawable drawable, int frameDimen) {
@@ -677,6 +696,14 @@ public class CropperImageView extends ImageView {
         this.mAddPaddingToMakeSquare = mAddPaddingToMakeSquare;
     }
 
+    public boolean isGestureEnabled() {
+        return gestureEnabled;
+    }
+
+    public void setGestureEnabled(boolean gestureEnabled) {
+        this.gestureEnabled = gestureEnabled;
+    }
+
     public void release() {
         setImageBitmap(null);
         if (mBitmap != null) {
@@ -688,6 +715,10 @@ public class CropperImageView extends ImageView {
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            if (!gestureEnabled) {
+                return false;
+            }
+
             if (e1 == null || e2 == null) {
                 return false;
             }
@@ -706,6 +737,10 @@ public class CropperImageView extends ImageView {
 
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
+            if (!gestureEnabled) {
+                return false;
+            }
+
             Matrix matrix = getImageMatrix();
             // This does the trick!
             mFocusX = detector.getFocusX();
