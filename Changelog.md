@@ -1,3 +1,6 @@
+### V 0.1.7 (2016-11-18)
+Optimized cropping using canvas.
+
 ### V 0.1.6 (2016-05-24)
 Fixed a bug where cropped image was still based on the original image and not replaced image.
 

@@ -2,8 +2,8 @@
 
 This is a lightweight Image Cropper for Android which also supports no-crop feature.
 
-**[Project Page](http://www.jayrambhia.com/project/nocropper/)**
-**[Blogpost](http://www.jayrambhia.com/blog/cropper/)**
+**[Project Page](http://www.jayrambhia.com/project/nocropper-library)**
+**[Blogpost](http://www.jayrambhia.com/blog/instagram-cropper)**
 
 Here's a short gif showing how it works.
 
@@ -36,13 +36,28 @@ forwarded to `CropperImageView`.
 ### Dependency
 
     dependencies {
-        compile 'com.fenchtose.nocropper:nocropper:0.1.6'
+        compile 'com.fenchtose.nocropper:nocropper:0.1.7'
     }
 
 ## CropperImageView
 
 It's a square ImageView which acts as the cropper. It tries to keep the image in the range of max and min zoom.
 It automatically adjusts the position of the image, if it's zoomed out.
+
+### How To Use:
+
+    <com.fenchtose.nocropper.CropperView
+        android:background="#ff282828"
+        android:id="@+id/cropper_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:grid_opacity="0.8"
+        app:grid_thickness="0.8dp"
+        app:grid_color="@color/colorAccent"
+        app:padding_color="#ff282828"/>
+ 
+And that's it. `CropperView` is ready to be used anywhere in the app. No dependencies.        
+
 
 ### Useful Methods:
 
