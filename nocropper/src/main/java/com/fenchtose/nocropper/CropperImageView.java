@@ -191,9 +191,12 @@ public class CropperImageView extends ImageView {
             Log.w(TAG, "Bitmap size greater than 1280. This might cause memory issues");
         }
 
+
+
         mBitmap = bm;
 
         if (doPreScaling) {
+
             int max_param = Math.max(bm.getWidth(), bm.getHeight());
             mPreScale = (float) max_param / (float) getWidth();
 
@@ -256,15 +259,6 @@ public class CropperImageView extends ImageView {
         matrix.postTranslate((frameDimen - width / scaleFactor) / 2,
                 (frameDimen - height / scaleFactor) / 2);
         setImageMatrix(matrix);
-
-        // If over scrolled, return back to the place.
-        float tx = getMatrixValue(matrix, Matrix.MTRANS_X);
-        float ty = getMatrixValue(matrix, Matrix.MTRANS_Y);
-        float scaleX = getMatrixValue(matrix, Matrix.MSCALE_X);
-        float xx = getWidth() / 2 - mMinZoom * drawable.getIntrinsicWidth() / 2;
-        float yy = getHeight() / 2 - mMinZoom * drawable.getIntrinsicHeight() / 2;
-
-        animateAdjustmentWithScale(tx, xx, ty, yy, scaleX, mMinZoom);
     }
 
     private void fitToCenter(Drawable drawable, int frameDimen) {
@@ -297,6 +291,15 @@ public class CropperImageView extends ImageView {
         matrix.postTranslate((frameDimen - width / scaleFactor) / 2,
                 (frameDimen - height / scaleFactor) / 2);
         setImageMatrix(matrix);
+
+        // If over scrolled, return back to the place.
+        float tx = getMatrixValue(matrix, Matrix.MTRANS_X);
+        float ty = getMatrixValue(matrix, Matrix.MTRANS_Y);
+        float scaleX = getMatrixValue(matrix, Matrix.MSCALE_X);
+        float xx = getWidth() / 2 - mMinZoom * drawable.getIntrinsicWidth() / 2;
+        float yy = getHeight() / 2 - mMinZoom * drawable.getIntrinsicHeight() / 2;
+
+        animateAdjustmentWithScale(tx, xx, ty, yy, scaleX, mMinZoom);
     }
 
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
