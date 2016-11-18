@@ -18,6 +18,7 @@
             android:layout_height="wrap_content"
             app:grid_opacity="0.8"
             app:grid_thickness="0.8dp"
+            app:padding_color="@color/colorAccent"
             app:grid_color="@color/colorAccent"/>
 
         <ImageView

@@ -7,8 +7,10 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -579,6 +581,7 @@ public class CropperImageView extends ImageView {
             Log.i(TAG, "xTrans: " + xTrans + ", yTrans: " + yTrans + " , scale: " + scale);
         }
 
+        // Load bitmap which is mutable
         Bitmap bitmap;
         if (DEBUG) {
             Log.i(TAG, "old bitmap: " + mBitmap.getWidth() + " " + mBitmap.getHeight());
@@ -634,12 +637,26 @@ public class CropperImageView extends ImageView {
             if (mBitmap.getHeight() > mBitmap.getWidth()) {
                 // Height is greater than width.
                 if (xTrans >= 0) {
-                    // Image is zoomed. Crop from height and add padding to make square
-                    bitmap = Bitmap.createBitmap(mBitmap, 0, (int)cropY, mBitmap.getWidth(), (int)Y,
-                            null, true);
+                    // Image is zoomed. Crop from height
+
+                    Rect src = new Rect(0, (int)cropY, mBitmap.getWidth(), (int)(Y + cropY));
 
                     if (mAddPaddingToMakeSquare) {
-                        bitmap = BitmapUtils.addPadding(bitmap, mPaintColor);
+                        // Crop and add padding to the same bitmap
+                        int size = (int)Y;
+                        bitmap = Bitmap.createBitmap(size, size, mBitmap.getConfig());
+                        Canvas canvas = new Canvas(bitmap);
+                        canvas.drawColor(mPaintColor);
+
+                        // Put cropped bitmap into the canvas
+                        int left = (size - mBitmap.getWidth())/2;
+                        Rect dest = new Rect(left, 0, left + mBitmap.getWidth() , size);
+
+                        canvas.drawBitmap(mBitmap, src, dest, null);
+                    } else {
+
+                        bitmap = Bitmap.createBitmap(mBitmap, 0, (int)cropY, mBitmap.getWidth(), (int)Y,
+                                null, true);
                     }
 
                 } else {
@@ -650,11 +667,24 @@ public class CropperImageView extends ImageView {
             } else {
                 if (yTrans >= 0) {
                     // Image is zoomed. Crop from width and add padding to make square
-                    bitmap = Bitmap.createBitmap(mBitmap, (int)cropX, 0, (int)X, mBitmap.getHeight(),
-                            null, true);
+
+                    Rect src = new Rect((int)cropX, 0, (int)(cropX + X), mBitmap.getHeight());
 
                     if (mAddPaddingToMakeSquare) {
-                        bitmap = BitmapUtils.addPadding(bitmap, mPaintColor);
+                        // Crop and add padding to the same bitmap
+                        int size = (int)X;
+                        bitmap = Bitmap.createBitmap(size, size, mBitmap.getConfig());
+                        Canvas canvas = new Canvas(bitmap);
+                        canvas.drawColor(mPaintColor);
+
+                        // Put cropped bitmap into the canvas
+                        int top = (size - mBitmap.getHeight())/2;
+                        Rect dest = new Rect(0, top, size , top + mBitmap.getHeight());
+
+                        canvas.drawBitmap(mBitmap, src, dest, null);
+                    } else {
+                        bitmap = Bitmap.createBitmap(mBitmap, (int) cropX, 0, (int) X, mBitmap.getHeight(),
+                                null, true);
                     }
 
                 } else {
