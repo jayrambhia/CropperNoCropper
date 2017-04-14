@@ -31,10 +31,8 @@ public class CropperImageView extends ImageView {
     private float[] mMatrixValues = new float[9];
 
     protected GestureDetector mGestureDetector;
-    private GestureListener mGestureListener;
 
     protected ScaleGestureDetector mScaleDetector;
-    private ScaleListener mScaleListener;
 
     private float mMinZoom;
     private float mMaxZoom;
@@ -93,13 +91,17 @@ public class CropperImageView extends ImageView {
 
         if (attrs != null) {
             TypedArray mTypedArray = context.obtainStyledAttributes(attrs, R.styleable.CropperView);
-            mPaintColor = mTypedArray.getColor(R.styleable.CropperView_padding_color, mPaintColor);
-            mAddPaddingToMakeSquare = mTypedArray.getBoolean(R.styleable.CropperView_add_padding_to_make_square, true);
+            if (mTypedArray != null) {
+                mPaintColor = mTypedArray.getColor(R.styleable.CropperView_padding_color, mPaintColor);
+                mAddPaddingToMakeSquare = mTypedArray.getBoolean(R.styleable.CropperView_add_padding_to_make_square, true);
+                mTypedArray.recycle();
+            }
         }
 
-        mGestureListener = new GestureListener();
+        GestureListener mGestureListener = new GestureListener();
         mGestureDetector = new GestureDetector(context, mGestureListener, null, true);
-        mScaleListener = new ScaleListener();
+
+        ScaleListener mScaleListener = new ScaleListener();
         mScaleDetector = new ScaleGestureDetector(context, mScaleListener);
 
         setScaleType(ScaleType.MATRIX);
@@ -469,13 +471,11 @@ public class CropperImageView extends ImageView {
 
         Drawable drawable = getDrawable();
         if (drawable == null) {
-            return changeRequired;
+            return false;
         }
 
         Matrix matrix = getImageMatrix();
 
-        float sx = getMatrixValue(matrix, Matrix.MTRANS_X);
-        float sy = getMatrixValue(matrix, Matrix.MTRANS_Y);
         float tx = getMatrixValue(matrix, Matrix.MTRANS_X);
         float ty = getMatrixValue(matrix, Matrix.MTRANS_Y);
         float scaleX = getMatrixValue(matrix, Matrix.MSCALE_X);

@@ -105,39 +105,8 @@ public class CropperView extends FrameLayout {
     }
 
     public void getCroppedBitmapAsync(final CropperCallback callback) {
-
-        AsyncTask<Void, Void, Bitmap> task = new AsyncTask<Void, Void, Bitmap>() {
-
-            private boolean isOOMThrown;
-
-            @Override
-            protected void onPreExecute() {
-                callback.onStarted();
-            }
-
-            @Override
-            protected Bitmap doInBackground(Void... params) {
-                try {
-                    //noinspection WrongThread
-                    return getCroppedBitmap();
-                } catch (OutOfMemoryError e) {
-                    isOOMThrown = true;
-                    return null;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(Bitmap bitmap) {
-                if (bitmap == null && isOOMThrown) {
-                    callback.onOutOfMemoryError();
-                    return;
-                }
-
-                callback.onCropped(bitmap);
-            }
-        };
-
-        task.execute();
+        CropperTask task = new CropperTask(callback);
+        task.execute(mImageView);
     }
 
     public boolean isPreScaling() {
