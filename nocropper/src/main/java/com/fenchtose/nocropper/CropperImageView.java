@@ -184,7 +184,7 @@ public class CropperImageView extends ImageView {
                     mGestureCallback.onGestureCompleted();
                 }
 
-                return onUp(event);
+                return onUp();
 
         }
 
@@ -301,9 +301,19 @@ public class CropperImageView extends ImageView {
         matrix.postTranslate((frameDimen - width / scaleFactor) / 2,
                 (frameDimen - height / scaleFactor) / 2);
         setImageMatrix(matrix);
+
+        // If over scrolled, return back to the place.
+        float tx = getMatrixValue(matrix, Matrix.MTRANS_X);
+        float ty = getMatrixValue(matrix, Matrix.MTRANS_Y);
+        float scaleX = getMatrixValue(matrix, Matrix.MSCALE_X);
+        if (scaleX < mMinZoom) {
+            float xx = getWidth() / 2 - mMinZoom * drawable.getIntrinsicWidth() / 2;
+            float yy = getHeight() / 2 - mMinZoom * drawable.getIntrinsicHeight() / 2;
+            animateAdjustmentWithScale(tx, xx, ty, yy, scaleX, mMinZoom);
+        }
     }
 
-    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+    public boolean onScroll(float distanceX, float distanceY) {
 
         Matrix matrix = getImageMatrix();
         matrix.postTranslate(-distanceX, -distanceY);
@@ -313,7 +323,7 @@ public class CropperImageView extends ImageView {
         return true;
     }
 
-    private boolean onUp(MotionEvent event) {
+    private boolean onUp() {
 
         Drawable drawable = getDrawable();
         if (drawable == null) {
@@ -336,7 +346,7 @@ public class CropperImageView extends ImageView {
             Log.i(TAG, "scaled drawable size: " + scaleX * drawable.getIntrinsicWidth() + " " + scaleY * drawable.getIntrinsicHeight());
         }
 
-        if (scaleX <= mMinZoom) {
+        if (scaleX < mMinZoom) {
             if (DEBUG) {
                 Log.i(TAG, "set scale: " + mMinZoom);
             }
@@ -758,7 +768,7 @@ public class CropperImageView extends ImageView {
                 return false;
             }
 
-            CropperImageView.this.onScroll(e1, e2, distanceX, distanceY);
+            CropperImageView.this.onScroll(distanceX, distanceY);
             return false;
         }
 
