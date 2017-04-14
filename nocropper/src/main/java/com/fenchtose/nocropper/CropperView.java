@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
@@ -95,8 +96,48 @@ public class CropperView extends FrameLayout {
         mImageView.setMaxZoom(zoom);
     }
 
-    public Bitmap getCroppedBitmap() {
-        return mImageView.getCroppedBitmap();
+    public Bitmap getCroppedBitmap() throws OutOfMemoryError {
+        try {
+            return mImageView.cropBitmap();
+        } catch (OutOfMemoryError e) {
+            throw e;
+        }
+    }
+
+    public void getCroppedBitmapAsync(final CropperCallback callback) {
+
+        AsyncTask<Void, Void, Bitmap> task = new AsyncTask<Void, Void, Bitmap>() {
+
+            private boolean isOOMThrown;
+
+            @Override
+            protected void onPreExecute() {
+                callback.onStarted();
+            }
+
+            @Override
+            protected Bitmap doInBackground(Void... params) {
+                try {
+                    //noinspection WrongThread
+                    return getCroppedBitmap();
+                } catch (OutOfMemoryError e) {
+                    isOOMThrown = true;
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                if (bitmap == null && isOOMThrown) {
+                    callback.onOutOfMemoryError();
+                    return;
+                }
+
+                callback.onCropped(bitmap);
+            }
+        };
+
+        task.execute();
     }
 
     public boolean isPreScaling() {

@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -55,6 +56,7 @@ public class CropperImageView extends ImageView {
 
     private boolean showAnimation = true;
     private boolean isAdjusting = false;
+    private boolean isCropping = false;
 
     private int mPaintColor = Color.WHITE;
 
@@ -163,6 +165,11 @@ public class CropperImageView extends ImageView {
             return true;
         }
 
+        if (isCropping) {
+            Log.e(TAG, "Cropping current bitmap. Can't perform this action right now.");
+            return true;
+        }
+
         final int action = event.getActionMasked();
 
         if (action == MotionEvent.ACTION_DOWN) {
@@ -193,6 +200,12 @@ public class CropperImageView extends ImageView {
 
     @Override
     public void setImageBitmap(Bitmap bm) {
+
+        if (isCropping) {
+            Log.e(TAG, "Cropping current bitmap. Can't set bitmap now");
+            return;
+        }
+
         mFirstRender = true;
         if (bm == null) {
             mBitmap = null;
@@ -558,6 +571,12 @@ public class CropperImageView extends ImageView {
     }
 
     public void cropToCenter() {
+
+        if (isCropping) {
+            Log.e(TAG, "Cropping current bitmap. Can't perform this action right now.");
+            return;
+        }
+
         Drawable drawable = getDrawable();
         if (drawable != null) {
             cropToCenter(drawable, getWidth());
@@ -565,13 +584,38 @@ public class CropperImageView extends ImageView {
     }
 
     public void fitToCenter() {
+
+        if (isCropping) {
+            Log.e(TAG, "Cropping current bitmap. Can't perform this action right now.");
+            return;
+        }
+
         Drawable drawable = getDrawable();
         if (drawable != null) {
             fitToCenter(drawable, getWidth());
         }
     }
 
-    public Bitmap getCroppedBitmap() {
+    public Bitmap cropBitmap() throws OutOfMemoryError {
+
+        if (isCropping) {
+            Log.e(TAG, "Cropping current bitmap. Can't perform this action right now.");
+            return null;
+        }
+
+        isCropping = true;
+        try {
+            Bitmap bitmap = getCroppedBitmap();
+            isCropping = false;
+            return bitmap;
+        } catch (OutOfMemoryError e) {
+            isCropping = false;
+            throw e;
+        }
+
+    }
+
+    private Bitmap getCroppedBitmap() throws OutOfMemoryError {
         if (mBitmap == null) {
             Log.e(TAG, "original image is not available");
             return null;
@@ -592,7 +636,8 @@ public class CropperImageView extends ImageView {
         }
 
         // Load bitmap which is mutable
-        Bitmap bitmap;
+        Bitmap bitmap = null;
+
         if (DEBUG) {
             Log.i(TAG, "old bitmap: " + mBitmap.getWidth() + " " + mBitmap.getHeight());
         }
@@ -601,7 +646,14 @@ public class CropperImageView extends ImageView {
             // No scale/crop required.
             // Add padding if not square
             if (mAddPaddingToMakeSquare) {
-                return BitmapUtils.addPadding(mBitmap, mPaintColor);
+
+                try {
+                    return BitmapUtils.addPadding(mBitmap, mPaintColor);
+                } catch (OutOfMemoryError e) {
+                    Log.d(TAG, "OOM while adding padding");
+                    throw e;
+                }
+
             } else {
                 return mBitmap;
             }
@@ -653,26 +705,46 @@ public class CropperImageView extends ImageView {
 
                     if (mAddPaddingToMakeSquare) {
                         // Crop and add padding to the same bitmap
-                        int size = (int)Y;
-                        bitmap = Bitmap.createBitmap(size, size, mBitmap.getConfig());
-                        Canvas canvas = new Canvas(bitmap);
-                        canvas.drawColor(mPaintColor);
+                        try {
+                            int size = (int) Y;
+                            bitmap = Bitmap.createBitmap(size, size, mBitmap.getConfig());
+                            Canvas canvas = new Canvas(bitmap);
+                            canvas.drawColor(mPaintColor);
 
-                        // Put cropped bitmap into the canvas
-                        int left = (size - mBitmap.getWidth())/2;
-                        Rect dest = new Rect(left, 0, left + mBitmap.getWidth() , size);
+                            // Put cropped bitmap into the canvas
+                            int left = (size - mBitmap.getWidth()) / 2;
+                            Rect dest = new Rect(left, 0, left + mBitmap.getWidth(), size);
 
-                        canvas.drawBitmap(mBitmap, src, dest, null);
+                            canvas.drawBitmap(mBitmap, src, dest, null);
+                        } catch (OutOfMemoryError e) {
+                            if (bitmap != null && !bitmap.isRecycled()) {
+                                bitmap.recycle();
+                                bitmap = null;
+                                throw e;
+                            }
+                        }
+
                     } else {
 
-                        bitmap = Bitmap.createBitmap(mBitmap, 0, (int)cropY, mBitmap.getWidth(), (int)Y,
-                                null, true);
+                        try {
+                            bitmap = Bitmap.createBitmap(mBitmap, 0, (int) cropY, mBitmap.getWidth(), (int) Y,
+                                    null, true);
+                        } catch (OutOfMemoryError e) {
+                            bitmap = null;
+                            throw e;
+                        }
                     }
 
                 } else {
                     // Crop from width and height both
-                    bitmap = Bitmap.createBitmap(mBitmap, (int) cropX, (int)cropY, (int)X, (int)Y,
-                            null, true);
+                    try {
+                        bitmap = Bitmap.createBitmap(mBitmap, (int) cropX, (int) cropY, (int) X, (int) Y,
+                                null, true);
+
+                    } catch (OutOfMemoryError e) {
+                        bitmap = null;
+                        throw e;
+                    }
                 }
             } else {
                 if (yTrans >= 0) {
@@ -681,32 +753,54 @@ public class CropperImageView extends ImageView {
                     Rect src = new Rect((int)cropX, 0, (int)(cropX + X), mBitmap.getHeight());
 
                     if (mAddPaddingToMakeSquare) {
-                        // Crop and add padding to the same bitmap
-                        int size = (int)X;
-                        bitmap = Bitmap.createBitmap(size, size, mBitmap.getConfig());
-                        Canvas canvas = new Canvas(bitmap);
-                        canvas.drawColor(mPaintColor);
+                        try {
+                            // Crop and add padding to the same bitmap
+                            int size = (int) X;
+                            bitmap = Bitmap.createBitmap(size, size, mBitmap.getConfig());
+                            Canvas canvas = new Canvas(bitmap);
+                            canvas.drawColor(mPaintColor);
 
-                        // Put cropped bitmap into the canvas
-                        int top = (size - mBitmap.getHeight())/2;
-                        Rect dest = new Rect(0, top, size , top + mBitmap.getHeight());
+                            // Put cropped bitmap into the canvas
+                            int top = (size - mBitmap.getHeight()) / 2;
+                            Rect dest = new Rect(0, top, size, top + mBitmap.getHeight());
 
-                        canvas.drawBitmap(mBitmap, src, dest, null);
+                            canvas.drawBitmap(mBitmap, src, dest, null);
+                        } catch (OutOfMemoryError e) {
+                            if (bitmap != null && !bitmap.isRecycled()) {
+                                bitmap.recycle();
+                                bitmap = null;
+                                throw e;
+                            }
+                        }
                     } else {
-                        bitmap = Bitmap.createBitmap(mBitmap, (int) cropX, 0, (int) X, mBitmap.getHeight(),
-                                null, true);
+
+                        try {
+                            bitmap = Bitmap.createBitmap(mBitmap, (int) cropX, 0, (int) X, mBitmap.getHeight(),
+                                    null, true);
+                        } catch (OutOfMemoryError e) {
+                            bitmap = null;
+                            throw e;
+                        }
                     }
 
                 } else {
                     // Crop from width and height both.
-                    bitmap = Bitmap.createBitmap(mBitmap, (int) cropX, (int)cropY, (int)X, (int)Y,
-                            null, true);
+
+                    try {
+                        bitmap = Bitmap.createBitmap(mBitmap, (int) cropX, (int) cropY, (int) X, (int) Y,
+                                null, true);
+                    } catch (OutOfMemoryError e) {
+                        bitmap = null;
+                        throw e;
+                    }
 
                 }
 
                 if (DEBUG) {
                     Log.i(TAG, "width should be: " + mBitmap.getWidth());
-                    Log.i(TAG, "crop bitmap: " + bitmap.getWidth() + " " + bitmap.getHeight());
+                    if (bitmap != null) {
+                        Log.i(TAG, "crop bitmap: " + bitmap.getWidth() + " " + bitmap.getHeight());
+                    }
                 }
             }
         }
@@ -747,6 +841,12 @@ public class CropperImageView extends ImageView {
     }
 
     public void release() {
+
+        if (isCropping) {
+            Log.e(TAG, "Cropping current bitmap. Can't perform this action right now.");
+            return;
+        }
+
         setImageBitmap(null);
         if (mBitmap != null) {
             mBitmap.recycle();
@@ -758,6 +858,11 @@ public class CropperImageView extends ImageView {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if (!gestureEnabled) {
+                return false;
+            }
+
+            if (isCropping) {
+                Log.e(TAG, "Cropping current bitmap. Can't perform this action right now.");
                 return false;
             }
 
@@ -780,6 +885,11 @@ public class CropperImageView extends ImageView {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             if (!gestureEnabled) {
+                return false;
+            }
+
+            if (isCropping) {
+                Log.e(TAG, "Cropping current bitmap. Can't perform this action right now.");
                 return false;
             }
 

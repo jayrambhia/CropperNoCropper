@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
+import com.fenchtose.nocropper.CropperCallback;
 import com.fenchtose.nocropper.CropperView;
 
 import java.io.File;
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.crop_button)
     public void onImageCropClicked() {
-        cropImage();
+        cropImageAsync();
     }
 
     @OnClick(R.id.rotate_button)
@@ -159,6 +160,27 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Toast.makeText(this, "Gallery permission not granted", Toast.LENGTH_SHORT).show();
+    }
+
+    private void cropImageAsync() {
+        mImageView.getCroppedBitmapAsync(new CropperCallback() {
+            @Override
+            public void onCropped(Bitmap bitmap) {
+                if (bitmap != null) {
+
+                    try {
+                        BitmapUtils.writeBitmapToFile(bitmap, new File(Environment.getExternalStorageDirectory() + "/crop_test.jpg"), 90);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onOutOfMemoryError() {
+
+            }
+        });
     }
 
     private void cropImage() {
