@@ -36,7 +36,7 @@ forwarded to `CropperImageView`.
 ### Dependency
 
     dependencies {
-        compile 'com.fenchtose.nocropper:nocropper:0.1.7'
+        compile 'com.fenchtose.nocropper:nocropper:0.1.8'
     }
 
 ## CropperImageView
@@ -73,6 +73,7 @@ And that's it. `CropperView` is ready to be used anywhere in the app. No depende
  - `setMakeSquare(boolean status)` - If you want to add padding in the cropped image (if cropped image is not square)
  - `isMakeSquare()` - Check if cropper will give a square image or not 
  - `getCroppedBitmap()` - Get Cropped Bitmap
+ - `getCroppedBitmapAsync()` - Crop bitmap in background thread and get result via `CropperCallback`.
  - `release()` - Remove and Recycle Bitmap
 
 

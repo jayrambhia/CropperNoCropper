@@ -1,3 +1,6 @@
+### V 0.1.8 (2017-04-14)
+Fixed [panning with min zoom](https://github.com/jayrambhia/CropperNoCropper/issues/10). Async cropping support added.
+
 ### V 0.1.7 (2016-11-18)
 Optimized cropping using canvas.
 
