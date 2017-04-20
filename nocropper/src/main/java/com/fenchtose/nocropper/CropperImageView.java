@@ -34,9 +34,9 @@ public class CropperImageView extends ImageView {
 
     protected ScaleGestureDetector mScaleDetector;
 
-    private float mMinZoom;
-    private float mMaxZoom;
-    private float mBaseZoom;
+    private float mMinZoom = 0;
+    private float mMaxZoom = 0;
+    private float mBaseZoom = 0;
 
     private float mFocusX;
     private float mFocusY;
@@ -147,10 +147,29 @@ public class CropperImageView extends ImageView {
                     return;
                 }
 
-                mMinZoom = (float)(bottom - top) / Math.max(drawable.getIntrinsicHeight(),
-                        drawable.getIntrinsicWidth());
-                mBaseZoom = (float)(bottom - top)/ Math.min(drawable.getIntrinsicHeight(),
-                        drawable.getIntrinsicWidth());
+                int orientation = getResources().getConfiguration().orientation;
+
+                if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    mBaseZoom = (float) (right - left) / Math.min(drawable.getIntrinsicHeight(),
+                            drawable.getIntrinsicWidth());
+                } else {
+                    mBaseZoom = (float) (bottom - top) / Math.min(drawable.getIntrinsicHeight(),
+                            drawable.getIntrinsicWidth());
+                }
+
+                if (mMinZoom <= 0) {
+                    mMinZoom = mBaseZoom;
+                }
+
+                if (isMaxZoomSet && mBaseZoom > mMaxZoom) {
+                    // base zoom should not be greater than max zoom.
+                    // Not changing min zoom
+                    mBaseZoom = mMaxZoom;
+                    if (mMinZoom > mMaxZoom) {
+                        Log.e(TAG, "min zoom is greater than max zoom. Changing min zoom = max zoom");
+                        mMinZoom = mMaxZoom;
+                    }
+                }
 
                 cropToCenter(drawable, bottom - top);
                 mFirstRender = false;
@@ -359,15 +378,42 @@ public class CropperImageView extends ImageView {
             Log.i(TAG, "imageview size: " + getWidth() + " " + getHeight());
             Log.i(TAG, "drawable size: " + drawable.getIntrinsicWidth() + " " + drawable.getIntrinsicHeight());
             Log.i(TAG, "scaled drawable size: " + scaleX * drawable.getIntrinsicWidth() + " " + scaleY * drawable.getIntrinsicHeight());
+            Log.i(TAG, "h diff: " + (scaleY * drawable.getIntrinsicHeight() + ty - getHeight()));
         }
 
-        if (scaleX < mMinZoom) {
+        if (scaleX < mMinZoom || (scaleX <= mMinZoom && mMinZoom >= mBaseZoom)) {
             if (DEBUG) {
-                Log.i(TAG, "set scale: " + mMinZoom);
+                Log.i(TAG, "set scale to min zoom: " + mMinZoom);
             }
 
             float xx = getWidth()/2 - mMinZoom * drawable.getIntrinsicWidth()/2;
             float yy = getHeight()/2 - mMinZoom * drawable.getIntrinsicHeight()/2;
+
+            if (drawable.getIntrinsicHeight() > drawable.getIntrinsicWidth()) {
+                if (ty >= 0) {
+                    yy = 0;
+                } else if (ty + scaleY * drawable.getIntrinsicHeight() <= getHeight()) {
+                    yy = getHeight() - mMinZoom * drawable.getIntrinsicHeight();
+                } else {
+                    // We want to change scale based on P1. P1 is (x, mFocusY). x does not matter here. Consider 1D.
+                    // We translate P1 to origin (x, mFocusY) -> (x, 0)
+                    // Apply zoom on origin -> (minzoom/scale)
+                    // Translate origin to P1
+                    yy = (ty - mFocusY) * (mMinZoom/scaleY) + mFocusY;
+                }
+            } else {
+                if (tx >= 0) {
+                    xx = 0;
+                } else if (tx + scaleX * drawable.getIntrinsicWidth() <= getWidth()) {
+                    xx = getWidth() - mMinZoom * drawable.getIntrinsicWidth();
+                } else {
+                    // We want to change scale based on P1. P1 is (mFocusX, y). y does not matter here. Consider 1D.
+                    // We translate P1 to origin (mFocusX, y) -> (0, y)
+                    // Apply zoom on origin -> (minzoom/scale)
+                    // Translate origin to P1
+                    xx = (tx - mFocusX) * (mMinZoom/scaleX) + mFocusX;
+                }
+            }
 
             if (showAnimation()) {
 
@@ -384,7 +430,7 @@ public class CropperImageView extends ImageView {
                 }
             }
             return true;
-        } else if (scaleX < mBaseZoom) {
+        } else if (scaleX <= mBaseZoom) {
 
             // align to center for the smaller dimension
             int h = drawable.getIntrinsicHeight();
@@ -546,14 +592,19 @@ public class CropperImageView extends ImageView {
         return mMaxZoom;
     }
 
-    public void setMaxZoom(float mMaxZoom) {
+    public void setMaxZoom(float zoom) {
 
-        if (mMaxZoom <= 0) {
+        if (zoom <= 0) {
             Log.e(TAG, "Max zoom must be greater than 0");
             return;
         }
 
-        this.mMaxZoom = mMaxZoom;
+        if (mMinZoom > 0 && zoom < mMinZoom) {
+            Log.e(TAG, "Max zoom must be greater than min zoom");
+            return;
+        }
+
+        this.mMaxZoom = zoom;
         isMaxZoomSet = true;
     }
 
@@ -561,13 +612,18 @@ public class CropperImageView extends ImageView {
         return mMinZoom;
     }
 
-    public void setMinZoom(float mMInZoom) {
-        if (mMInZoom <= 0) {
+    public void setMinZoom(float zoom) {
+        if (zoom <= 0) {
             Log.e(TAG, "Min zoom must be greater than 0");
             return;
         }
 
-        this.mMinZoom = mMInZoom;
+        if (isMaxZoomSet && zoom > mMaxZoom) {
+            Log.e(TAG, "Min zoom must not be greater than max zoom");
+            return;
+        }
+
+        this.mMinZoom = zoom;
     }
 
     public void cropToCenter() {
