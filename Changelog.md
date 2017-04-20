@@ -1,3 +1,6 @@
+### V 0.1.9 (2017-04-20)
+Fixed [image center panning issue with min zoom](https://github.com/jayrambhia/CropperNoCropper/issues/21). Fixed overriding of `min zoom` by the view.
+
 ### V 0.1.8 (2017-04-14)
 Fixed [panning with min zoom](https://github.com/jayrambhia/CropperNoCropper/issues/10). Async cropping support added.
 

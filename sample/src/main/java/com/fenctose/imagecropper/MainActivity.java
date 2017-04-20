@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "bitmap: " + mBitmap.getWidth() + " " + mBitmap.getHeight());
 
         int maxP = Math.max(mBitmap.getWidth(), mBitmap.getHeight());
-        float scale1280 = (float)maxP / 1280;
+        float scale1280 = (float)maxP / 2560;
 
         if (mImageView.getWidth() != 0) {
             mImageView.setMaxZoom(mImageView.getWidth() * 2 / 1280f);
@@ -111,9 +111,12 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+        mImageView.setMinZoom(0.8f);
+
         mBitmap = Bitmap.createScaledBitmap(mBitmap, (int)(mBitmap.getWidth()/scale1280),
                 (int)(mBitmap.getHeight()/scale1280), true);
         mImageView.setImageBitmap(mBitmap);
+
     }
 
     private void startGalleryIntent() {
