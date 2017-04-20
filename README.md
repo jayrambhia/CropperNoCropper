@@ -17,6 +17,9 @@ It's a FrameLayout which contains a view for Grid and an imageview. This project
 CropperView contains some basic methods like `setImageBitmap()`, `setMaxZoom()`, `setMinZoom()`, etc which are
 forwarded to `CropperImageView`.
 
+It's not an Activity or Fragment. It's just a FrameLayout which you can use anywhere and however you want in your app.
+There are some styling and customizations also available.
+
 ## How To Install
 
 ### Maven
