@@ -42,6 +42,7 @@ public class CropperImageView extends ImageView {
     private float mFocusY;
 
     private boolean isMaxZoomSet = false;
+    private boolean isMinZoomSetByUser = false;
     private boolean mFirstRender = true;
 
     private Bitmap mBitmap;
@@ -157,18 +158,17 @@ public class CropperImageView extends ImageView {
                             drawable.getIntrinsicWidth());
                 }
 
-                if (mMinZoom <= 0) {
-                    mMinZoom = mBaseZoom;
-                }
-
                 if (isMaxZoomSet && mBaseZoom > mMaxZoom) {
                     // base zoom should not be greater than max zoom.
-                    // Not changing min zoom
                     mBaseZoom = mMaxZoom;
                     if (mMinZoom > mMaxZoom) {
                         Log.e(TAG, "min zoom is greater than max zoom. Changing min zoom = max zoom");
-                        mMinZoom = mMaxZoom;
+                        _setMinZoom(mMaxZoom);
                     }
+                }
+
+                if (mMinZoom <= 0 || !isMinZoomSetByUser) {
+                    _setMinZoom(mBaseZoom);
                 }
 
                 cropToCenter(drawable, bottom - top);
@@ -613,17 +613,25 @@ public class CropperImageView extends ImageView {
     }
 
     public void setMinZoom(float zoom) {
+        if (_setMinZoom(zoom)) {
+            isMinZoomSetByUser = true;
+        }
+    }
+
+    private boolean _setMinZoom(float zoom) {
         if (zoom <= 0) {
             Log.e(TAG, "Min zoom must be greater than 0");
-            return;
+            return false;
         }
 
         if (isMaxZoomSet && zoom > mMaxZoom) {
             Log.e(TAG, "Min zoom must not be greater than max zoom");
-            return;
+            return false;
         }
 
+        isMinZoomSetByUser = false;
         this.mMinZoom = zoom;
+        return true;
     }
 
     public void cropToCenter() {
