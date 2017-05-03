@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
@@ -172,6 +171,10 @@ public class CropperView extends FrameLayout {
     public void setGestureEnabled(boolean enabled) {
         this.gestureEnabled = enabled;
         mImageView.setGestureEnabled(enabled);
+    }
+
+    public void initWithFitToCenter(boolean status) {
+        mImageView.setInitWithFitToCenter(status);
     }
 
     private class TouchGestureCallback implements CropperImageView.GestureCallback {

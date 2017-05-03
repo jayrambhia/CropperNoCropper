@@ -12,7 +12,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -63,6 +62,8 @@ public class CropperImageView extends ImageView {
 
     private boolean gestureEnabled = true;
 
+    private boolean initWithFitToCenter = false;
+
     public CropperImageView(Context context) {
         super(context);
         init(context, null);
@@ -91,10 +92,11 @@ public class CropperImageView extends ImageView {
     private void init(Context context, AttributeSet attrs) {
 
         if (attrs != null) {
-            TypedArray mTypedArray = context.obtainStyledAttributes(attrs, R.styleable.CropperView);
+            TypedArray mTypedArray = context.obtainStyledAttributes(attrs, R.styleable.nocropper__CropperView);
             if (mTypedArray != null) {
-                mPaintColor = mTypedArray.getColor(R.styleable.CropperView_padding_color, mPaintColor);
-                mAddPaddingToMakeSquare = mTypedArray.getBoolean(R.styleable.CropperView_add_padding_to_make_square, true);
+                mPaintColor = mTypedArray.getColor(R.styleable.nocropper__CropperView_nocropper__padding_color, mPaintColor);
+                mAddPaddingToMakeSquare = mTypedArray.getBoolean(R.styleable.nocropper__CropperView_nocropper__add_padding_to_make_square, true);
+                initWithFitToCenter = mTypedArray.getBoolean(R.styleable.nocropper__CropperView_nocropper__fit_to_center, false);
                 mTypedArray.recycle();
             }
         }
@@ -151,10 +153,10 @@ public class CropperImageView extends ImageView {
                 int orientation = getResources().getConfiguration().orientation;
 
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    mBaseZoom = (float) (right - left) / Math.min(drawable.getIntrinsicHeight(),
+                    mBaseZoom = (float) (right - left) / Math.max(drawable.getIntrinsicHeight(),
                             drawable.getIntrinsicWidth());
                 } else {
-                    mBaseZoom = (float) (bottom - top) / Math.min(drawable.getIntrinsicHeight(),
+                    mBaseZoom = (float) (bottom - top) / Math.max(drawable.getIntrinsicHeight(),
                             drawable.getIntrinsicWidth());
                 }
 
@@ -171,7 +173,12 @@ public class CropperImageView extends ImageView {
                     _setMinZoom(mBaseZoom);
                 }
 
-                cropToCenter(drawable, bottom - top);
+                if (initWithFitToCenter) {
+                    fitToCenter(drawable, bottom - top);
+                } else {
+                    cropToCenter(drawable, bottom - top);
+                }
+
                 mFirstRender = false;
 
             }
@@ -902,6 +909,14 @@ public class CropperImageView extends ImageView {
 
     public void setGestureEnabled(boolean gestureEnabled) {
         this.gestureEnabled = gestureEnabled;
+    }
+
+    public boolean isInitWithFitToCenter() {
+        return initWithFitToCenter;
+    }
+
+    public void setInitWithFitToCenter(boolean initWithFitToCenter) {
+        this.initWithFitToCenter = initWithFitToCenter;
     }
 
     public void release() {

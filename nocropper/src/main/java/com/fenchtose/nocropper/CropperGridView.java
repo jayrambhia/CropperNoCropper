@@ -77,10 +77,10 @@ public class CropperGridView extends View {
     private void init(Context context, AttributeSet attrs) {
 
         if (attrs != null) {
-            TypedArray mTypedArray = context.obtainStyledAttributes(attrs, R.styleable.CropperView);
-            mColor = mTypedArray.getColor(R.styleable.CropperView_grid_color, mColor);
+            TypedArray mTypedArray = context.obtainStyledAttributes(attrs, R.styleable.nocropper__CropperView);
+            mColor = mTypedArray.getColor(R.styleable.nocropper__CropperView_nocropper__grid_color, mColor);
 
-            float alpha = 255 * mTypedArray.getFloat(R.styleable.CropperView_grid_opacity, 1f);
+            float alpha = 255 * mTypedArray.getFloat(R.styleable.nocropper__CropperView_nocropper__grid_opacity, 1f);
             if (alpha < 0) {
                 alpha = 0;
             } else if (alpha > 255) {
@@ -88,7 +88,7 @@ public class CropperGridView extends View {
             }
             mAlpha = (int)alpha;
 
-            mStrokeWidth = mTypedArray.getDimensionPixelOffset(R.styleable.CropperView_grid_thickness,
+            mStrokeWidth = mTypedArray.getDimensionPixelOffset(R.styleable.nocropper__CropperView_nocropper__grid_thickness,
                     mStrokeWidth);
 
             mTypedArray.recycle();

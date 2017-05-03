@@ -16,10 +16,10 @@
             android:id="@+id/imageview"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            app:grid_opacity="0.8"
-            app:grid_thickness="0.8dp"
-            app:add_padding_to_make_square="false"
-            app:grid_color="@color/colorAccent"/>
+            app:nocropper__grid_opacity="0.8"
+            app:nocropper__grid_thickness="0.8dp"
+            app:nocropper__add_padding_to_make_square="false"
+            app:nocropper__grid_color="@color/colorAccent"/>
 
         <ImageView
             android:id="@+id/snap_button"

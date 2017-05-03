@@ -16,10 +16,11 @@
             android:id="@+id/imageview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:grid_opacity="0.8"
-            app:grid_thickness="0.8dp"
-            app:padding_color="@color/colorAccent"
-            app:grid_color="@color/colorAccent"/>
+            app:nocropper__grid_opacity="0.8"
+            app:nocropper__grid_thickness="0.8dp"
+            app:nocropper__padding_color="@color/colorAccent"
+            app:nocropper__grid_color="@color/colorAccent"
+            app:nocropper__fit_to_center="true" />
 
         <ImageView
             android:id="@+id/snap_button"

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="CropperView">
-        <attr name="grid_color" format="color"/>
-        <attr name="grid_thickness" format="dimension"/>
-        <attr name="grid_opacity" format="float"/>
-        <attr name="padding_color" format="color"/>
-        <attr name="add_padding_to_make_square" format="boolean"/>
+    <declare-styleable name="nocropper__CropperView">
+        <attr name="nocropper__grid_color" format="color"/>
+        <attr name="nocropper__grid_thickness" format="dimension"/>
+        <attr name="nocropper__grid_opacity" format="float"/>
+        <attr name="nocropper__padding_color" format="color"/>
+        <attr name="nocropper__add_padding_to_make_square" format="boolean"/>
+        <attr name="nocropper__fit_to_center" format="boolean"/>
     </declare-styleable>
 </resources>
