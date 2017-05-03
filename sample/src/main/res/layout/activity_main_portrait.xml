@@ -19,8 +19,7 @@
             app:nocropper__grid_opacity="0.8"
             app:nocropper__grid_thickness="0.8dp"
             app:nocropper__padding_color="@color/colorAccent"
-            app:nocropper__grid_color="@color/colorAccent"
-            app:nocropper__fit_to_center="true" />
+            app:nocropper__grid_color="@color/colorAccent" />
 
         <ImageView
             android:id="@+id/snap_button"
