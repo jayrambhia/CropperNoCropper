@@ -39,7 +39,7 @@ There are some styling and customizations also available.
 ### Dependency
 
     dependencies {
-        compile 'com.fenchtose.nocropper:nocropper:0.1.9'
+        compile 'com.fenchtose.nocropper:nocropper:0.2.0'
     }
 
 ## CropperImageView
@@ -54,10 +54,10 @@ It automatically adjusts the position of the image, if it's zoomed out.
         android:id="@+id/cropper_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:grid_opacity="0.8"
-        app:grid_thickness="0.8dp"
-        app:grid_color="@color/colorAccent"
-        app:padding_color="#ff282828"/>
+        app:nocropper__grid_opacity="0.8"
+        app:nocropper__grid_thickness="0.8dp"
+        app:nocropper__grid_color="@color/colorAccent"
+        app:nocropper__padding_color="#ff282828"/>
  
 And that's it. `CropperView` is ready to be used anywhere in the app. No dependencies.        
 
@@ -74,7 +74,8 @@ And that's it. `CropperView` is ready to be used anywhere in the app. No depende
  - `fitToCenter()` - Fit Image in the center (no cropping view)
  - `setPaddingColor(int color)` - Set Color of square image padding
  - `setMakeSquare(boolean status)` - If you want to add padding in the cropped image (if cropped image is not square)
- - `isMakeSquare()` - Check if cropper will give a square image or not 
+ - `isMakeSquare()` - Check if cropper will give a square image or not
+ - `initWithFitToCenter(boolean fitToCenter)` - Cropper will fit image to center instead of cropping to center when bitmap is set.
  - `getCroppedBitmap()` - Get Cropped Bitmap
  - `getCroppedBitmapAsync()` - Crop bitmap in background thread and get result via `CropperCallback`.
  - `release()` - Remove and Recycle Bitmap
@@ -82,11 +83,17 @@ And that's it. `CropperView` is ready to be used anywhere in the app. No depende
 
 ### Styleables
 
- - `grid_color` - Color of the grid
- - `grid_thickness` - Thickness of grid lines
- - `grid_opacity` - Opacity of grid lines
- - `padding_color` - Color of the image padding
- - `add_padding_to_make_square` - boolean
+ - `nocropper__grid_color` - Color of the grid
+ - `nocropper__grid_thickness` - Thickness of grid lines
+ - `nocropper__grid_opacity` - Opacity of grid lines
+ - `nocropper__padding_color` - Color of the image padding
+ - `nocropper__add_padding_to_make_square` - boolean
+ - `nocropper__fit_to_center` - boolean - Fit image to center instead of crop when you set a bitmap
+
+### 0.1 to 0.2 update note:
+
+All the styleables are renamed to have prefix `nocropper__` so as not to have collision issues with other resource attributes. By collision I mean, your app will not
+build if it has to resources attributes with same name.
 
 ## Licenses and Release History
 

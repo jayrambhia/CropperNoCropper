@@ -1,3 +1,6 @@
+### V 0.2.0 (2017-05-03)
+Option to load image as fit to center. Updated resource attributes to have prefix `nocropper__`.
+
 ### V 0.1.9 (2017-04-20)
 Fixed [image center panning issue with min zoom](https://github.com/jayrambhia/CropperNoCropper/issues/21). Fixed overriding of `min zoom` by the view.
 
