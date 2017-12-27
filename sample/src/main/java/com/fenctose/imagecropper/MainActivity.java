@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
+import com.fenchtose.nocropper.BitmapResult;
 import com.fenchtose.nocropper.CropperCallback;
 import com.fenchtose.nocropper.CropperView;
 
@@ -176,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void cropImageAsync() {
-        mImageView.getCroppedBitmapAsync(new CropperCallback() {
+        BitmapResult.State state = mImageView.getCroppedBitmapAsync(new CropperCallback() {
             @Override
             public void onCropped(Bitmap bitmap) {
                 if (bitmap != null) {
@@ -194,11 +195,22 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        if (state == BitmapResult.State.FAILURE_GESTURE_IN_PROCESS) {
+            Toast.makeText(this, "unable to crop. Gesture in progress", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void cropImage() {
 
-        Bitmap bitmap = mImageView.getCroppedBitmap();
+        BitmapResult result = mImageView.getCroppedBitmap();
+
+        if (result.getState() == BitmapResult.State.FAILURE_GESTURE_IN_PROCESS) {
+            Toast.makeText(this, "unable to crop. Gesture in progress", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Bitmap bitmap = result.bitmap;
 
         if (bitmap != null) {
 

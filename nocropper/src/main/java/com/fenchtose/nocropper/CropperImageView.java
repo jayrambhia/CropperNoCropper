@@ -36,6 +36,7 @@ class CropperImageView extends ImageView {
     private float mMinZoom = 0;
     private float mMaxZoom = 0;
     private float mBaseZoom = 0;
+    private float mBaseZoomBigger = 0;
 
     private float mFocusX;
     private float mFocusY;
@@ -155,14 +156,20 @@ class CropperImageView extends ImageView {
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     mBaseZoom = (float) (right - left) / Math.max(drawable.getIntrinsicHeight(),
                             drawable.getIntrinsicWidth());
+                    mBaseZoomBigger = (float) (right - left) / Math.min(drawable.getIntrinsicHeight(),
+                            drawable.getIntrinsicWidth());
                 } else {
                     mBaseZoom = (float) (bottom - top) / Math.max(drawable.getIntrinsicHeight(),
+                            drawable.getIntrinsicWidth());
+
+                    mBaseZoomBigger = (float) (bottom - top) / Math.min(drawable.getIntrinsicHeight(),
                             drawable.getIntrinsicWidth());
                 }
 
                 if (isMaxZoomSet && mBaseZoom > mMaxZoom) {
                     // base zoom should not be greater than max zoom.
                     mBaseZoom = mMaxZoom;
+                    mBaseZoomBigger = mMaxZoom;
                     if (mMinZoom > mMaxZoom) {
                         Log.e(TAG, "min zoom is greater than max zoom. Changing min zoom = max zoom");
                         _setMinZoom(mMaxZoom);
@@ -388,7 +395,7 @@ class CropperImageView extends ImageView {
             Log.i(TAG, "h diff: " + (scaleY * drawable.getIntrinsicHeight() + ty - getHeight()));
         }
 
-        if (scaleX < mMinZoom || (scaleX <= mMinZoom && mMinZoom >= mBaseZoom)) {
+        if (scaleX < mMinZoom && mMinZoom >= mBaseZoom) {
             if (DEBUG) {
                 Log.i(TAG, "set scale to min zoom: " + mMinZoom);
             }
@@ -437,7 +444,7 @@ class CropperImageView extends ImageView {
                 }
             }
             return true;
-        } else if (scaleX <= mBaseZoom) {
+        } else if (scaleX <= mBaseZoom || scaleX <= mBaseZoomBigger) {
 
             // align to center for the smaller dimension
             int h = drawable.getIntrinsicHeight();

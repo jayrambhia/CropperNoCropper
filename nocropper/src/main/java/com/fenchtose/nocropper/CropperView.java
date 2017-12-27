@@ -19,6 +19,7 @@ public class CropperView extends FrameLayout {
     private CropperGridView mGridView;
 
     private boolean gestureEnabled = true;
+    private boolean isGestureInProgess = false;
 
     private GridCallback gridCallback;
 
@@ -97,17 +98,38 @@ public class CropperView extends FrameLayout {
         mImageView.setMaxZoom(zoom);
     }
 
-    public Bitmap getCroppedBitmap() throws OutOfMemoryError {
+    /**
+     * Crop bitmap in sync
+     * @return {@link BitmapResult} may contain null bitmap if it's not a success. If this method is called when
+     * user is still using the gesture (scrolling, panning, etc), it would return result with state {@link BitmapResult.State.FAILURE_GESTURE_IN_PROCESS}
+     * @throws OutOfMemoryError
+     */
+    public BitmapResult getCroppedBitmap() throws OutOfMemoryError {
+        if (isGestureInProgess) {
+            return BitmapResult.GestureFailure();
+        }
+
         try {
-            return mImageView.cropBitmap();
+            return BitmapResult.success(mImageView.cropBitmap());
         } catch (OutOfMemoryError e) {
             throw e;
         }
     }
 
-    public void getCroppedBitmapAsync(final CropperCallback callback) {
+    /**
+     * Crop bitmap async
+     * @param callback {@link CropperCallback}
+     * @return {@link BitmapResult.State.STARTED} if cropping will start else {@link BitmapResult.State.FAILURE_GESTURE_IN_PROCESS}
+     * if cropping can not be started because the user is in the middle of a gesture.
+     */
+    public BitmapResult.State getCroppedBitmapAsync(final CropperCallback callback) {
+        if (isGestureInProgess) {
+            return BitmapResult.State.FAILURE_GESTURE_IN_PROCESS;
+        }
+
         CropperTask task = new CropperTask(callback);
         task.execute(mImageView);
+        return BitmapResult.State.STARTED;
     }
 
     public boolean isPreScaling() {
@@ -183,11 +205,13 @@ public class CropperView extends FrameLayout {
 
         @Override
         public void onGestureStarted() {
+            isGestureInProgess = true;
             mGridView.setShowGrid(gridCallback == null || gridCallback.onGestureStarted());
         }
 
         @Override
         public void onGestureCompleted() {
+            isGestureInProgess = false;
             mGridView.setShowGrid(gridCallback != null && gridCallback.onGestureCompleted());
         }
     }
