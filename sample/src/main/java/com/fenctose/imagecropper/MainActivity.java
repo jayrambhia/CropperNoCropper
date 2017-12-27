@@ -96,7 +96,8 @@ public class MainActivity extends AppCompatActivity {
         float scale1280 = (float)maxP / 1280;
 
         if (mImageView.getWidth() != 0) {
-            mImageView.setMaxZoom(mImageView.getWidth() * 2 / 1280f);
+//            mImageView.setMaxZoom(mImageView.getWidth() * 2 / 1280f);
+            mImageView.setMinZoom(0.1f);
         } else {
 
             ViewTreeObserver vto = mImageView.getViewTreeObserver();
@@ -113,6 +114,10 @@ public class MainActivity extends AppCompatActivity {
 
         mBitmap = Bitmap.createScaledBitmap(mBitmap, (int)(mBitmap.getWidth()/scale1280),
                 (int)(mBitmap.getHeight()/scale1280), true);
+
+//        mImageView.setPreScaling(true);
+
+        mImageView.setDebug(true);
 
         mImageView.setImageBitmap(mBitmap);
 
@@ -165,24 +170,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void cropImageAsync() {
-        mImageView.getCroppedBitmapAsync(new CropperCallback() {
-            @Override
-            public void onCropped(Bitmap bitmap) {
-                if (bitmap != null) {
-
-                    try {
-                        BitmapUtils.writeBitmapToFile(bitmap, new File(Environment.getExternalStorageDirectory() + "/crop_test.jpg"), 90);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onOutOfMemoryError() {
-
-            }
-        });
+        mImageView.getCroppedRect();
+//        mImageView.getCroppedBitmapAsync(new CropperCallback() {
+//            @Override
+//            public void onCropped(Bitmap bitmap) {
+//                if (bitmap != null) {
+//
+//                    try {
+//                        BitmapUtils.writeBitmapToFile(bitmap, new File(Environment.getExternalStorageDirectory() + "/crop_test.jpg"), 90);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onOutOfMemoryError() {
+//
+//            }
+//        });
     }
 
     private void cropImage() {

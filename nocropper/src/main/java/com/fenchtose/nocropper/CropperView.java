@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.RectF;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
@@ -91,6 +92,10 @@ public class CropperView extends FrameLayout {
         mImageView.setImageBitmap(bm);
     }
 
+    public void setImageBitmap(Bitmap bm, boolean withPreScaling) {
+        mImageView.setImageBitmap(bm, withPreScaling);
+    }
+
     public void setMaxZoom(float zoom) {
         mImageView.setMaxZoom(zoom);
     }
@@ -108,12 +113,12 @@ public class CropperView extends FrameLayout {
         task.execute(mImageView);
     }
 
-    public boolean isPreScaling() {
-        return mImageView.isDoPreScaling();
+    public RectF getCroppedRect() {
+        return mImageView.getCroppedRect();
     }
 
-    public void setPreScaling(boolean doPreScaling) {
-        mImageView.setDoPreScaling(doPreScaling);
+    public boolean isPreScaling() {
+        return mImageView.isPreScaling();
     }
 
     public float getMaxZoom() {
