@@ -20,7 +20,6 @@ import com.fenchtose.nocropper.CropperView;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.jar.Manifest;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -49,6 +48,18 @@ public class MainActivity extends AppCompatActivity {
         }
         ButterKnife.bind(this);
         mImageView.setDebug(true);
+
+        mImageView.setGridCallback(new CropperView.GridCallback() {
+            @Override
+            public boolean onGestureStarted() {
+                return true;
+            }
+
+            @Override
+            public boolean onGestureCompleted() {
+                return false;
+            }
+        });
     }
 
     @OnClick(R.id.image_button)

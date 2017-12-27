@@ -20,6 +20,8 @@ public class CropperView extends FrameLayout {
 
     private boolean gestureEnabled = true;
 
+    private GridCallback gridCallback;
+
     public CropperView(Context context) {
         super(context);
         init(context, null);
@@ -181,12 +183,30 @@ public class CropperView extends FrameLayout {
 
         @Override
         public void onGestureStarted() {
-            mGridView.setShowGrid(true);
+            mGridView.setShowGrid(gridCallback == null || gridCallback.onGestureStarted());
         }
 
         @Override
         public void onGestureCompleted() {
-            mGridView.setShowGrid(false);
+            mGridView.setShowGrid(gridCallback != null && gridCallback.onGestureCompleted());
         }
+    }
+
+    public void setGridCallback(GridCallback gridCallback) {
+        this.gridCallback = gridCallback;
+    }
+
+    public interface GridCallback {
+        /**
+         * Invoked when user user touches the grid
+         * @return true if you want to show grid, else false
+         */
+        boolean onGestureStarted();
+
+        /**
+         * Invoked when user completes the gesture
+         * @return true if you want to show grid, else false
+         */
+        boolean onGestureCompleted();
     }
 }
