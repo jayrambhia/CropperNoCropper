@@ -39,7 +39,7 @@ There are some styling and customizations also available.
 ### Dependency
 
     dependencies {
-        compile 'com.fenchtose.nocropper:nocropper:0.2.0'
+        compile 'com.fenchtose.nocropper:nocropper:0.2.1'
     }
 
 ## CropperImageView
@@ -76,9 +76,10 @@ And that's it. `CropperView` is ready to be used anywhere in the app. No depende
  - `setMakeSquare(boolean status)` - If you want to add padding in the cropped image (if cropped image is not square)
  - `isMakeSquare()` - Check if cropper will give a square image or not
  - `initWithFitToCenter(boolean fitToCenter)` - Cropper will fit image to center instead of cropping to center when bitmap is set.
- - `getCroppedBitmap()` - Get Cropped Bitmap
- - `getCroppedBitmapAsync()` - Crop bitmap in background thread and get result via `CropperCallback`.
+ - `getCroppedBitmap()` - Get Cropped Bitmap - returns BitmapResult. Bitmap may be null if the cropper is unable to crop. If the user is in mid-gesture, it will return BitmapResult with null bitmap and State as FAILURE_GESTURE_IN_PROCESS
+ - `getCroppedBitmapAsync(CropperCallback callback)` - Crop bitmap in background thread and get result via `CropperCallback`. - returns BitmapResult.State. If the user is in mid-gesture, it will return State as FAILURE_GESTURE_IN_PROCESS else it will return STARTED to indicate that the process has been started.
  - `release()` - Remove and Recycle Bitmap
+ - `setGridCallback(GridCallback callback)` - More control to you about when you want to show the grid.
 
 
 ### Styleables
@@ -89,6 +90,21 @@ And that's it. `CropperView` is ready to be used anywhere in the app. No depende
  - `nocropper__padding_color` - Color of the image padding
  - `nocropper__add_padding_to_make_square` - boolean
  - `nocropper__fit_to_center` - boolean - Fit image to center instead of crop when you set a bitmap
+
+### CropperCallback
+
+It's an abstract class for callback. The callback methods will be invoked on main ui thread. It has following methods.
+
+ - onStarted() - invoked when cropping is started.
+ - onCropped(Bitmap bitmap) - invoked when cropped result is available.
+ - onOutOfMemoryError() - invoked when the cropper encounters OOM error while cropping.
+
+# GridCallback
+
+It's an interface class for callback. You can control when you want to show this based on this class. It has following methods.
+
+ - onGestureStarted() - invoked when user starts a gesture. Return true if you want to show the grid. Return false if you want to hide the grid.
+ - onGestureCompleted() - invoked when completes the gesture. Return true if you want to show the grid. Return false if you want to hide the grid.
 
 ### 0.1 to 0.2 update note:
 

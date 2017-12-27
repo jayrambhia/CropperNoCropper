@@ -210,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        Bitmap bitmap = result.bitmap;
+        Bitmap bitmap = result.getBitmap();
 
         if (bitmap != null) {
 

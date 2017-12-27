@@ -23,7 +23,7 @@ import android.widget.ImageView;
 /**
  * Created by Jay Rambhia on 10/29/2015.
  */
-class CropperImageView extends ImageView {
+public class CropperImageView extends ImageView {
 
     private static final String TAG = "CropperImageView";
 

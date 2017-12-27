@@ -15,7 +15,7 @@ import android.view.View;
 /**
  * Created by Jay Rambhia on 11/4/2015.
  */
-class CropperGridView extends View {
+public class CropperGridView extends View {
 
     private static final String TAG = "CropperGridView";
 

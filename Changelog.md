@@ -1,3 +1,8 @@
+### V 0.2.1 (2017-12-27)
+- Changes in getCroppedBitmap and getCroppedBitmapAsync method.
+- Fixed issue where image was being fixed to an edge.
+- Added GridCallback to control when you want to show the grid.
+
 ### V 0.2.0 (2017-05-03)
 Option to load image as fit to center. Updated resource attributes to have prefix `nocropper__`. Fixed base zoom issue.
 
