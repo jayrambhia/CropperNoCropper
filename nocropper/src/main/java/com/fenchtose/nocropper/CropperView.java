@@ -116,28 +116,34 @@ public class CropperView extends FrameLayout {
         }
     }
 
+    public CropResult getCropInfo() {
+        if (isGestureInProgess) {
+            return CropResult.GestureFailure();
+        }
+
+        CropInfo info = mImageView.getCropInfo();
+        if (info != null) {
+            return CropResult.success(info);
+        }
+
+        return CropResult.error();
+    }
+
     /**
      * Crop bitmap async
      * @param callback {@link CropperCallback}
      * @return State STARTED if cropping will start else FAILURE_GESTURE_IN_PROCESS
      * if cropping can not be started because the user is in the middle of a gesture.
      */
-    public BitmapResult.State getCroppedBitmapAsync(final CropperCallback callback) {
+    public CropState getCroppedBitmapAsync(final CropperCallback callback) {
         if (isGestureInProgess) {
-            return BitmapResult.State.FAILURE_GESTURE_IN_PROCESS;
+            return CropState.FAILURE_GESTURE_IN_PROCESS;
         }
 
         CropperTask task = new CropperTask(callback);
-        task.execute(mImageView);
-        return BitmapResult.State.STARTED;
-    }
-
-    public boolean isPreScaling() {
-        return mImageView.isDoPreScaling();
-    }
-
-    public void setPreScaling(boolean doPreScaling) {
-        mImageView.setDoPreScaling(doPreScaling);
+        Cropper cropper = new Cropper(mImageView.getCropInfo(), mImageView.getLoadedBitmap());
+        task.execute(cropper);
+        return CropState.STARTED;
     }
 
     public float getMaxZoom() {

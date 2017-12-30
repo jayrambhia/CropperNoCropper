@@ -1,3 +1,7 @@
+### V 0.3.0 (2017-12-30)
+ - Pre-scaling support is here! It's just different now.
+ - Load scaled down version of the original image and use `CropInfo`.
+
 ### V 0.2.1 (2017-12-27)
 - Changes in getCroppedBitmap and getCroppedBitmapAsync method.
 - Fixed issue where image was being fixed to an edge.

@@ -5,9 +5,9 @@ import android.graphics.Bitmap;
 public class BitmapResult {
 
     private final Bitmap bitmap;
-    private final State state;
+    private final CropState state;
 
-    private BitmapResult(Bitmap bitmap, State state) {
+    private BitmapResult(Bitmap bitmap, CropState state) {
         this.bitmap = bitmap;
         this.state = state;
     }
@@ -16,21 +16,20 @@ public class BitmapResult {
         return bitmap;
     }
 
-    public State getState() {
+    public CropState getState() {
         return state;
     }
 
     static BitmapResult GestureFailure() {
-        return new BitmapResult(null, State.FAILURE_GESTURE_IN_PROCESS);
+        return new BitmapResult(null, CropState.FAILURE_GESTURE_IN_PROCESS);
     }
 
     static BitmapResult success(Bitmap bitmap) {
-        return new BitmapResult(bitmap, State.SUCCESS);
+        return new BitmapResult(bitmap, CropState.SUCCESS);
     }
 
-    public enum State {
-        STARTED,
-        SUCCESS,
-        FAILURE_GESTURE_IN_PROCESS
+    static BitmapResult error() {
+        return new BitmapResult(null, CropState.ERROR);
     }
+
 }

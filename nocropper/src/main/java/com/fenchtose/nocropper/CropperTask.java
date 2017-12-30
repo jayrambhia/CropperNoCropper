@@ -1,9 +1,8 @@
 package com.fenchtose.nocropper;
 
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
-public class CropperTask extends AsyncTask<CropperImageView, Void, Bitmap> {
+public class CropperTask extends AsyncTask<Cropper, Void, BitmapResult> {
 
     private final CropperCallback callback;
     private boolean isOOMThrown = false;
@@ -18,24 +17,32 @@ public class CropperTask extends AsyncTask<CropperImageView, Void, Bitmap> {
     }
 
     @Override
-    protected Bitmap doInBackground(CropperImageView... params) {
+    protected BitmapResult doInBackground(Cropper... params) {
         try {
             //noinspection WrongThread
-            return params[0].cropBitmap();
+            return BitmapResult.success(params[0].cropBitmap());
         } catch (OutOfMemoryError e) {
             isOOMThrown = true;
             return null;
+        } catch (IllegalArgumentException e) {
+            return BitmapResult.error();
         }
     }
 
     @Override
-    protected void onPostExecute(Bitmap bitmap) {
-        if (bitmap == null && isOOMThrown) {
+    protected void onPostExecute(BitmapResult result) {
+        if (result == null || isOOMThrown) {
             callback.onOutOfMemoryError();
             return;
         }
 
-        callback.onCropped(bitmap);
+        if (result.getState() == CropState.ERROR) {
+            callback.onError();
+        }
+
+        if (result.getBitmap() != null) {
+            callback.onCropped(result.getBitmap());
+        }
     }
 
 }

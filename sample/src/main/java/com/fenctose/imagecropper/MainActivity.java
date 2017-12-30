@@ -13,17 +13,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewTreeObserver;
+import android.widget.CheckBox;
 import android.widget.Toast;
 
 import com.fenchtose.nocropper.BitmapResult;
+import com.fenchtose.nocropper.CropInfo;
+import com.fenchtose.nocropper.CropResult;
+import com.fenchtose.nocropper.CropState;
 import com.fenchtose.nocropper.CropperCallback;
 import com.fenchtose.nocropper.CropperView;
+import com.fenchtose.nocropper.ScaledCropper;
 
 import java.io.File;
 import java.io.IOException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
@@ -35,8 +41,17 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.imageview)
     CropperView mImageView;
 
+    @Bind(R.id.original_checkbox)
+    CheckBox originalImageCheckbox;
+
+    @Bind(R.id.crop_checkbox)
+    CheckBox cropAsyncCheckbox;
+
+    private Bitmap originalBitmap;
     private Bitmap mBitmap;
     private boolean isSnappedToCenter = false;
+
+    private int rotationCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +85,11 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.crop_button)
     public void onImageCropClicked() {
-        cropImageAsync();
+        if (cropAsyncCheckbox.isChecked()) {
+            cropImageAsync();
+        } else {
+            cropImage();
+        }
     }
 
     @OnClick(R.id.rotate_button)
@@ -83,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         snapImage();
     }
 
-    @OnClick(R.id.gesture_button)
+    @OnCheckedChanged(R.id.gesture_checkbox)
     public void toggleGestures() {
         boolean enabled = mImageView.isGestureEnabled();
         enabled = !enabled;
@@ -91,21 +110,16 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Gesture " + (enabled ? "Enabled" : "Disabled"), Toast.LENGTH_SHORT).show();
     }
 
-    @OnClick(R.id.replace_button)
-    public void replaceImage() {
-        if (mBitmap != null) {
-            mBitmap = BitmapUtils.rotateBitmap(mBitmap, 180);
-            mImageView.replaceBitmap(mBitmap);
-        }
-    }
-
     private void loadNewImage(String filePath) {
+        rotationCount = 0;
         Log.i(TAG, "load image: " + filePath);
         mBitmap = BitmapFactory.decodeFile(filePath);
+        originalBitmap = mBitmap;
         Log.i(TAG, "bitmap: " + mBitmap.getWidth() + " " + mBitmap.getHeight());
 
         int maxP = Math.max(mBitmap.getWidth(), mBitmap.getHeight());
         float scale1280 = (float)maxP / 1280;
+        Log.i(TAG, "scaled: " + scale1280 + " - " + (1/scale1280));
 
         if (mImageView.getWidth() != 0) {
             mImageView.setMaxZoom(mImageView.getWidth() * 2 / 1280f);
@@ -127,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
                 (int)(mBitmap.getHeight()/scale1280), true);
 
         mImageView.setImageBitmap(mBitmap);
-
     }
 
     private void startGalleryIntent() {
@@ -177,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void cropImageAsync() {
-        BitmapResult.State state = mImageView.getCroppedBitmapAsync(new CropperCallback() {
+        CropState state = mImageView.getCroppedBitmapAsync(new CropperCallback() {
             @Override
             public void onCropped(Bitmap bitmap) {
                 if (bitmap != null) {
@@ -196,8 +209,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        if (state == BitmapResult.State.FAILURE_GESTURE_IN_PROCESS) {
+        if (state == CropState.FAILURE_GESTURE_IN_PROCESS) {
             Toast.makeText(this, "unable to crop. Gesture in progress", Toast.LENGTH_SHORT).show();
+        }
+
+        if (originalImageCheckbox.isChecked()) {
+            cropOriginalImageAsync();
         }
     }
 
@@ -205,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
 
         BitmapResult result = mImageView.getCroppedBitmap();
 
-        if (result.getState() == BitmapResult.State.FAILURE_GESTURE_IN_PROCESS) {
+        if (result.getState() == CropState.FAILURE_GESTURE_IN_PROCESS) {
             Toast.makeText(this, "unable to crop. Gesture in progress", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -213,12 +230,76 @@ public class MainActivity extends AppCompatActivity {
         Bitmap bitmap = result.getBitmap();
 
         if (bitmap != null) {
-
+            Log.d("Cropper", "crop1 bitmap: " + bitmap.getWidth() + ", " + bitmap.getHeight());
             try {
                 BitmapUtils.writeBitmapToFile(bitmap, new File(Environment.getExternalStorageDirectory() + "/crop_test.jpg"), 90);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        if (originalImageCheckbox.isChecked()) {
+            cropOriginalImage();
+        }
+
+    }
+
+    private ScaledCropper prepareCropForOriginalImage() {
+        CropResult result = mImageView.getCropInfo();
+        if (result.getCropInfo() == null) {
+            return null;
+        }
+
+        float scale;
+        if (rotationCount % 2 == 0) {
+            // same width and height
+            scale = (float) originalBitmap.getWidth()/mBitmap.getWidth();
+        } else {
+            // width and height are interchanged
+            scale = (float) originalBitmap.getWidth()/mBitmap.getHeight();
+        }
+
+        CropInfo cropInfo = result.getCropInfo().rotate90XTimes(mBitmap.getWidth(), mBitmap.getHeight(), rotationCount);
+        return new ScaledCropper(cropInfo, originalBitmap, scale);
+    }
+
+    private void cropOriginalImage() {
+        if (originalBitmap != null) {
+            ScaledCropper cropper = prepareCropForOriginalImage();
+            if (cropper == null) {
+                return;
+            }
+
+            Bitmap bitmap = cropper.cropBitmap();
+            if (bitmap != null) {
+                try {
+                    BitmapUtils.writeBitmapToFile(bitmap, new File(Environment.getExternalStorageDirectory() + "/crop_test_info_orig.jpg"), 90);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void cropOriginalImageAsync() {
+        if (originalBitmap != null) {
+            ScaledCropper cropper = prepareCropForOriginalImage();
+            if (cropper == null) {
+                return;
+            }
+
+            cropper.crop(new CropperCallback() {
+                @Override
+                public void onCropped(Bitmap bitmap) {
+                    if (bitmap != null) {
+                        try {
+                            BitmapUtils.writeBitmapToFile(bitmap, new File(Environment.getExternalStorageDirectory() + "/crop_test_info_orig.jpg"), 90);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -230,6 +311,7 @@ public class MainActivity extends AppCompatActivity {
 
         mBitmap = BitmapUtils.rotateBitmap(mBitmap, 90);
         mImageView.setImageBitmap(mBitmap);
+        rotationCount++;
     }
 
     private void snapImage() {
