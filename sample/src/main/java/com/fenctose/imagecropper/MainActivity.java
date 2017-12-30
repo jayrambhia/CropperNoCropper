@@ -234,21 +234,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        BitmapResult result1 = mImageView.getCroppedBitmapWithInfo();
-        if (result1.getState() == CropState.SUCCESS) {
-            bitmap = result1.getBitmap();
-
-            if (bitmap != null) {
-                Log.d("Cropper", "crop2 bitmap: " + bitmap.getWidth() + ", " + bitmap.getHeight());
-
-                try {
-                    BitmapUtils.writeBitmapToFile(bitmap, new File(Environment.getExternalStorageDirectory() + "/crop_test_info.jpg"), 90);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
         cropOriginalImage();
 
     }
@@ -273,10 +258,10 @@ public class MainActivity extends AppCompatActivity {
             CropInfo cropInfo = cresult.getCropInfo();
 
             for (int i=0; i<rotationCount%4; i++) {
-                cropInfo = cropInfo.rotateInfo(mBitmap.getWidth(), mBitmap.getHeight());
+                cropInfo = cropInfo.rotate90(mBitmap.getHeight());
             }
 
-            ScaledCropper cropper = new ScaledCropper(this, cropInfo, originalBitmap, scale);
+            ScaledCropper cropper = new ScaledCropper(cropInfo, originalBitmap, scale);
             cropper.crop(new CropperCallback() {
                 @Override
                 public void onCropped(Bitmap bitmap) {

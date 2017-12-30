@@ -3,6 +3,7 @@ package com.fenchtose.nocropper;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.util.Log;
 
 /**
  * Created by Jay Rambhia on 11/2/2015.
@@ -63,6 +64,9 @@ public class BitmapUtils {
 
             Rect dest = new Rect(info.horizontalPadding, info.verticalPadding, info.horizontalPadding + info.width, info.verticalPadding + info.height);
             Rect src = new Rect(info.x, info.y, info.x + info.width, info.y + info.height);
+
+            Log.d("BitmapUtils", "src: " + src);
+            Log.d("BitmapUtils", "dest: " + dest);
 
             canvas.drawBitmap(bmp, src, dest, null);
             return bitmap;

@@ -130,31 +130,6 @@ public class CropperView extends FrameLayout {
     }
 
     /**
-     * Crop bitmap in sync
-     * @return {@link BitmapResult} may contain null bitmap if it's not a success. If this method is called when
-     * user is still using the gesture (scrolling, panning, etc), it would return result with state FAILURE_GESTURE_IN_PROCESS
-     * @throws OutOfMemoryError
-     */
-    public BitmapResult getCroppedBitmapWithInfo() throws OutOfMemoryError {
-        if (isGestureInProgess) {
-            return BitmapResult.GestureFailure();
-        }
-
-        try {
-            CropInfo info = mImageView.getCropInfo();
-            if (info != null) {
-                return BitmapResult.success(mImageView.getCroppedBitmap(info));
-            } else {
-                return BitmapResult.GestureFailure();
-            }
-        } catch (OutOfMemoryError e) {
-            throw e;
-        } catch (IllegalArgumentException e) {
-            return BitmapResult.error();
-        }
-    }
-
-    /**
      * Crop bitmap async
      * @param callback {@link CropperCallback}
      * @return State STARTED if cropping will start else FAILURE_GESTURE_IN_PROCESS
@@ -166,7 +141,8 @@ public class CropperView extends FrameLayout {
         }
 
         CropperTask task = new CropperTask(callback);
-        task.execute(mImageView);
+        Cropper cropper = new Cropper(mImageView.getCropInfo(), mImageView.getLoadedBitmap());
+        task.execute(cropper);
         return CropState.STARTED;
     }
 
