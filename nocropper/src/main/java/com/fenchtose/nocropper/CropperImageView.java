@@ -715,7 +715,7 @@ public class CropperImageView extends ImageView {
             // Add padding if not square
             int verticalPadding = mBitmap.getHeight() > mBitmap.getWidth() ? 0 : (mBitmap.getWidth() - mBitmap.getHeight()) / 2;
             int horizontalPadding = mBitmap.getWidth() > mBitmap.getHeight() ? 0 : (mBitmap.getHeight() - mBitmap.getWidth()) / 2;
-            return CropInfo.cropCompleteBitmap(mBitmap, scale, mAddPaddingToMakeSquare, horizontalPadding, verticalPadding);
+            return CropInfo.cropCompleteBitmap(mBitmap, scale, mAddPaddingToMakeSquare, horizontalPadding, verticalPadding, mPaintColor);
         }
 
         float cropY = - yTrans / scale;
@@ -766,10 +766,22 @@ public class CropperImageView extends ImageView {
                 // Image is zoomed. Crop from height
                 rect = new Rect(0, (int)cropY, mBitmap.getWidth(), (int)(Y + cropY));
                 horizontalPadding = (int) ((Y - mBitmap.getWidth()) / 2);
+
+                if (DEBUG) {
+                    Log.i(TAG, "xTrans >= 0 " + xTrans);
+                    Log.i(TAG, "rect: " + rect);
+                    Log.i(TAG, "horizontal padding: " + horizontalPadding);
+                }
+
             } else {
                 // Crop from width and height both
                 rect = new Rect((int)cropX, (int)cropY, (int)(cropX + X), (int)(cropY + Y));
                 isPaddingRequired = false;
+
+                if (DEBUG) {
+                    Log.i(TAG, "xTrans < 0 " + yTrans);
+                    Log.i(TAG, "rect: " + rect);
+                }
             }
         } else {
             if (DEBUG) {
@@ -800,20 +812,18 @@ public class CropperImageView extends ImageView {
             }
         }
 
-        return CropInfo.cropFromRect(rect, scale, mAddPaddingToMakeSquare && isPaddingRequired, horizontalPadding, verticalPadding);
+        isPaddingRequired = isPaddingRequired && (horizontalPadding != 0 || verticalPadding != 0);
+
+        return CropInfo.cropFromRect(rect, scale, mAddPaddingToMakeSquare && isPaddingRequired, horizontalPadding, verticalPadding, mPaintColor);
     }
 
-    public Bitmap getCroppedBitmap(CropInfo cropInfo) throws OutOfMemoryError {
+    public Bitmap getCroppedBitmap(CropInfo cropInfo) throws OutOfMemoryError, IllegalArgumentException {
         if (mBitmap == null) {
             Log.e(TAG, "original image is not available");
             return null;
         }
 
-        if (!cropInfo.addPadding) {
-            return Bitmap.createBitmap(mBitmap, cropInfo.x, cropInfo.y, cropInfo.width, cropInfo.height);
-        }
-
-        return BitmapUtils.addPadding(mBitmap, cropInfo, mPaintColor);
+        return BitmapUtils.getCroppedBitmap(mBitmap, cropInfo);
     }
 
     private Bitmap getCroppedBitmap() throws OutOfMemoryError {
@@ -915,6 +925,12 @@ public class CropperImageView extends ImageView {
                             // Put cropped bitmap into the canvas
                             int left = (size - mBitmap.getWidth()) / 2;
                             Rect dest = new Rect(left, 0, left + mBitmap.getWidth(), size);
+
+                            if (DEBUG) {
+                                Log.i(TAG, "xTrans >= 0 " + xTrans);
+                                Log.i(TAG, "src: " + src + ", dst: " + dest);
+                                Log.i(TAG, "horizontal padding: " + left);
+                            }
 
                             canvas.drawBitmap(mBitmap, src, dest, null);
                         } catch (OutOfMemoryError e) {

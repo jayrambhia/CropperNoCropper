@@ -14,4 +14,7 @@ public abstract class CropperCallback {
 
     }
 
+    public void onError() {
+
+    }
 }

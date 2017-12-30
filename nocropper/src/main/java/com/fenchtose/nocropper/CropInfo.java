@@ -30,12 +30,39 @@ public class CropInfo {
         this.paddingColor = paddingColor;
     }
 
-    public static CropInfo cropCompleteBitmap(Bitmap bitmap, float scale, boolean paddingToMakeSquare, int horizontalPadding, int verticalPadding) {
-        return new CropInfo(0, 0, bitmap.getWidth(), bitmap.getHeight(), scale, paddingToMakeSquare, horizontalPadding, verticalPadding, -1);
+    public static CropInfo cropCompleteBitmap(Bitmap bitmap, float scale, boolean paddingToMakeSquare, int horizontalPadding, int verticalPadding, int paddingColor) {
+        return new CropInfo(0, 0, bitmap.getWidth(), bitmap.getHeight(), scale, paddingToMakeSquare, horizontalPadding, verticalPadding, paddingColor);
     }
 
-    public static CropInfo cropFromRect(Rect rect, float scale, boolean paddingToMakeSquare, int horizontalPadding, int verticalPadding) {
-        return new CropInfo(rect.left, rect.top, rect.width(), rect.height(), scale, paddingToMakeSquare, horizontalPadding, verticalPadding, -1);
+    public static CropInfo cropFromRect(Rect rect, float scale, boolean paddingToMakeSquare, int horizontalPadding, int verticalPadding, int paddingColor) {
+        return new CropInfo(rect.left, rect.top, rect.width(), rect.height(), scale, paddingToMakeSquare, horizontalPadding, verticalPadding, paddingColor);
+    }
+
+    public CropInfo scaleInfo(float scale) {
+        return new CropInfo(
+                (int)(x * scale),
+                (int)(y * scale),
+                (int)(width * scale),
+                (int)(height * scale),
+                scale,
+                addPadding,
+                (int)(horizontalPadding * scale),
+                (int)(verticalPadding * scale),
+                paddingColor);
+    }
+
+    public CropInfo rotateInfo(int bitmapWidth, int bitmapHeight) {
+        return new CropInfo(
+                bitmapHeight - y - height,
+                x,
+                height,
+                width,
+                scale,
+                addPadding,
+                verticalPadding,
+                horizontalPadding,
+                paddingColor
+        );
     }
 
     @Override

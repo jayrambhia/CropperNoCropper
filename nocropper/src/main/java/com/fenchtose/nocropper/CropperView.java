@@ -117,6 +117,19 @@ public class CropperView extends FrameLayout {
         }
     }
 
+    public CropResult getCropInfo() {
+        if (isGestureInProgess) {
+            return CropResult.GestureFailure();
+        }
+
+        CropInfo info = mImageView.getCropInfo();
+        if (info != null) {
+            return CropResult.success(info);
+        }
+
+        return CropResult.error();
+    }
+
     /**
      * Crop bitmap in sync
      * @return {@link BitmapResult} may contain null bitmap if it's not a success. If this method is called when
@@ -131,13 +144,14 @@ public class CropperView extends FrameLayout {
         try {
             CropInfo info = mImageView.getCropInfo();
             if (info != null) {
-                Log.i(TAG, "crop info: " + info);
                 return BitmapResult.success(mImageView.getCroppedBitmap(info));
             } else {
                 return BitmapResult.GestureFailure();
             }
         } catch (OutOfMemoryError e) {
             throw e;
+        } catch (IllegalArgumentException e) {
+            return BitmapResult.error();
         }
     }
 
@@ -147,14 +161,14 @@ public class CropperView extends FrameLayout {
      * @return State STARTED if cropping will start else FAILURE_GESTURE_IN_PROCESS
      * if cropping can not be started because the user is in the middle of a gesture.
      */
-    public BitmapResult.State getCroppedBitmapAsync(final CropperCallback callback) {
+    public CropState getCroppedBitmapAsync(final CropperCallback callback) {
         if (isGestureInProgess) {
-            return BitmapResult.State.FAILURE_GESTURE_IN_PROCESS;
+            return CropState.FAILURE_GESTURE_IN_PROCESS;
         }
 
         CropperTask task = new CropperTask(callback);
         task.execute(mImageView);
-        return BitmapResult.State.STARTED;
+        return CropState.STARTED;
     }
 
     public boolean isPreScaling() {

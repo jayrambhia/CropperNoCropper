@@ -17,8 +17,11 @@ import android.widget.Toast;
 
 import com.fenchtose.nocropper.BitmapResult;
 import com.fenchtose.nocropper.CropInfo;
+import com.fenchtose.nocropper.CropResult;
+import com.fenchtose.nocropper.CropState;
 import com.fenchtose.nocropper.CropperCallback;
 import com.fenchtose.nocropper.CropperView;
+import com.fenchtose.nocropper.ScaledCropper;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,8 +39,12 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.imageview)
     CropperView mImageView;
 
+    private Bitmap originalBitmap;
     private Bitmap mBitmap;
     private boolean isSnappedToCenter = false;
+
+    private String filePath;
+    private int rotationCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,16 +105,21 @@ public class MainActivity extends AppCompatActivity {
         if (mBitmap != null) {
             mBitmap = BitmapUtils.rotateBitmap(mBitmap, 180);
             mImageView.replaceBitmap(mBitmap);
+            rotationCount += 2;
         }
     }
 
     private void loadNewImage(String filePath) {
+        rotationCount = 0;
+        this.filePath = filePath;
         Log.i(TAG, "load image: " + filePath);
         mBitmap = BitmapFactory.decodeFile(filePath);
+        originalBitmap = mBitmap;
         Log.i(TAG, "bitmap: " + mBitmap.getWidth() + " " + mBitmap.getHeight());
 
         int maxP = Math.max(mBitmap.getWidth(), mBitmap.getHeight());
         float scale1280 = (float)maxP / 1280;
+        Log.i(TAG, "scaled: " + scale1280 + " - " + (1/scale1280));
 
         if (mImageView.getWidth() != 0) {
             mImageView.setMaxZoom(mImageView.getWidth() * 2 / 1280f);
@@ -129,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
                 (int)(mBitmap.getHeight()/scale1280), true);
 
         mImageView.setImageBitmap(mBitmap);
-
     }
 
     private void startGalleryIntent() {
@@ -179,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void cropImageAsync() {
-        BitmapResult.State state = mImageView.getCroppedBitmapAsync(new CropperCallback() {
+        CropState state = mImageView.getCroppedBitmapAsync(new CropperCallback() {
             @Override
             public void onCropped(Bitmap bitmap) {
                 if (bitmap != null) {
@@ -198,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        if (state == BitmapResult.State.FAILURE_GESTURE_IN_PROCESS) {
+        if (state == CropState.FAILURE_GESTURE_IN_PROCESS) {
             Toast.makeText(this, "unable to crop. Gesture in progress", Toast.LENGTH_SHORT).show();
         }
     }
@@ -207,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
 
         BitmapResult result = mImageView.getCroppedBitmap();
 
-        if (result.getState() == BitmapResult.State.FAILURE_GESTURE_IN_PROCESS) {
+        if (result.getState() == CropState.FAILURE_GESTURE_IN_PROCESS) {
             Toast.makeText(this, "unable to crop. Gesture in progress", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -224,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         BitmapResult result1 = mImageView.getCroppedBitmapWithInfo();
-        if (result1.getState() == BitmapResult.State.SUCCESS) {
+        if (result1.getState() == CropState.SUCCESS) {
             bitmap = result1.getBitmap();
 
             if (bitmap != null) {
@@ -237,6 +248,49 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
+        cropOriginalImage();
+
+    }
+
+    private void cropOriginalImage() {
+        if (originalBitmap != null) {
+            CropResult cresult = mImageView.getCropInfo();
+            if (cresult.getCropInfo() == null) {
+                return;
+            }
+
+            float scale;
+            if (rotationCount % 2 == 0) {
+                // same width and height
+                scale = (float) originalBitmap.getWidth()/mBitmap.getWidth();
+            } else {
+                // width and height are interchanged
+                scale = (float) originalBitmap.getWidth()/mBitmap.getHeight();
+            }
+
+
+            CropInfo cropInfo = cresult.getCropInfo();
+
+            for (int i=0; i<rotationCount%4; i++) {
+                cropInfo = cropInfo.rotateInfo(mBitmap.getWidth(), mBitmap.getHeight());
+            }
+
+            ScaledCropper cropper = new ScaledCropper(this, cropInfo, originalBitmap, scale);
+            cropper.crop(new CropperCallback() {
+                @Override
+                public void onCropped(Bitmap bitmap) {
+                    if (bitmap != null) {
+                        Log.d("Cropper", "orig crop bitmap: " + bitmap.getWidth() + ", " + bitmap.getHeight());
+                        try {
+                            BitmapUtils.writeBitmapToFile(bitmap, new File(Environment.getExternalStorageDirectory() + "/crop_test_info_orig.jpg"), 90);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+        }
     }
 
     private void rotateImage() {
@@ -247,6 +301,7 @@ public class MainActivity extends AppCompatActivity {
 
         mBitmap = BitmapUtils.rotateBitmap(mBitmap, 90);
         mImageView.setImageBitmap(mBitmap);
+        rotationCount++;
     }
 
     private void snapImage() {
