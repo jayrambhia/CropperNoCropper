@@ -67,17 +67,26 @@
             android:text="Crop"
             android:id="@+id/crop_button"/>
 
-        <Button
+        <CheckBox
+            android:id="@+id/gesture_checkbox"
             android:layout_width="160dp"
             android:layout_height="wrap_content"
-            android:text="Toggle Gesture"
-            android:id="@+id/gesture_button"/>
+            android:checked="true"
+            android:text="Allow Gesture"/>
 
-        <Button
+        <CheckBox
+            android:id="@+id/original_checkbox"
             android:layout_width="160dp"
             android:layout_height="wrap_content"
-            android:text="Replace"
-            android:id="@+id/replace_button"/>
+            android:checked="true"
+            android:text="Crop original image"/>
+
+        <CheckBox
+            android:id="@+id/crop_checkbox"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Crop Async"/>
 
     </LinearLayout>
 
