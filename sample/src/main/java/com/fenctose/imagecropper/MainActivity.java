@@ -245,8 +245,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private ScaledCropper prepareCropForOriginalImage() {
-        CropResult cresult = mImageView.getCropInfo();
-        if (cresult.getCropInfo() == null) {
+        CropResult result = mImageView.getCropInfo();
+        if (result.getCropInfo() == null) {
             return null;
         }
 
@@ -259,10 +259,7 @@ public class MainActivity extends AppCompatActivity {
             scale = (float) originalBitmap.getWidth()/mBitmap.getHeight();
         }
 
-
-        CropInfo cropInfo = cresult.getCropInfo();
-
-        cropInfo.rotate90XTimes(mBitmap.getWidth(), mBitmap.getHeight(), rotationCount);
+        CropInfo cropInfo = result.getCropInfo().rotate90XTimes(mBitmap.getWidth(), mBitmap.getHeight(), rotationCount);
         return new ScaledCropper(cropInfo, originalBitmap, scale);
     }
 
