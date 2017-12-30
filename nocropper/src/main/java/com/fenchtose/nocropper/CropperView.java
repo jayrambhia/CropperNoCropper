@@ -6,7 +6,6 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
@@ -169,14 +168,6 @@ public class CropperView extends FrameLayout {
         CropperTask task = new CropperTask(callback);
         task.execute(mImageView);
         return CropState.STARTED;
-    }
-
-    public boolean isPreScaling() {
-        return mImageView.isDoPreScaling();
-    }
-
-    public void setPreScaling(boolean doPreScaling) {
-        mImageView.setDoPreScaling(doPreScaling);
     }
 
     public float getMaxZoom() {

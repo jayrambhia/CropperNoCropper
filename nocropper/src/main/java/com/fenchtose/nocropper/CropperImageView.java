@@ -46,8 +46,6 @@ public class CropperImageView extends ImageView {
     private boolean mFirstRender = true;
 
     private Bitmap mBitmap;
-    private boolean doPreScaling = false;
-    private float mPreScale;
 
     private boolean mAddPaddingToMakeSquare = true;
 
@@ -248,23 +246,12 @@ public class CropperImageView extends ImageView {
             return;
         }
 
-        if (bm.getHeight() > 1280 || bm.getWidth() > 1280) {
+        if (bm.getHeight() > 1280 || bm.getWidth() > 1280 && DEBUG) {
             Log.w(TAG, "Bitmap size greater than 1280. This might cause memory issues");
         }
 
         mBitmap = bm;
-
-        if (doPreScaling) {
-            int max_param = Math.max(bm.getWidth(), bm.getHeight());
-            mPreScale = (float) max_param / (float) getWidth();
-
-            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bm, (int) (bm.getWidth() / mPreScale),
-                    (int) (bm.getHeight() / mPreScale), false);
-            super.setImageBitmap(scaledBitmap);
-        } else {
-            mPreScale = 1f;
-            super.setImageBitmap(bm);
-        }
+        super.setImageBitmap(bm);
         requestLayout();
     }
 
@@ -594,14 +581,6 @@ public class CropperImageView extends ImageView {
         return getMatrixValue(matrix, Matrix.MSCALE_X);
     }
 
-    public boolean isDoPreScaling() {
-        return doPreScaling;
-    }
-
-    public void setDoPreScaling(boolean doPreScaling) {
-        this.doPreScaling = doPreScaling;
-    }
-
     public float getMaxZoom() {
         return mMaxZoom;
     }
@@ -833,10 +812,6 @@ public class CropperImageView extends ImageView {
         }
 
         Matrix matrix = getImageMatrix();
-
-        if (doPreScaling) {
-            matrix.postScale(1/mPreScale, 1/mPreScale);
-        }
 
         float xTrans = getMatrixValue(matrix, Matrix.MTRANS_X);
         float yTrans = getMatrixValue(matrix, Matrix.MTRANS_Y);
@@ -1105,7 +1080,6 @@ public class CropperImageView extends ImageView {
     }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-        protected boolean mScaled = false;
 
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
