@@ -16,6 +16,7 @@ import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
 import com.fenchtose.nocropper.BitmapResult;
+import com.fenchtose.nocropper.CropInfo;
 import com.fenchtose.nocropper.CropperCallback;
 import com.fenchtose.nocropper.CropperView;
 
@@ -70,7 +71,8 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.crop_button)
     public void onImageCropClicked() {
-        cropImageAsync();
+//        cropImageAsync();
+        cropImage();
     }
 
     @OnClick(R.id.rotate_button)
@@ -213,11 +215,26 @@ public class MainActivity extends AppCompatActivity {
         Bitmap bitmap = result.getBitmap();
 
         if (bitmap != null) {
-
+            Log.d("Cropper", "crop1 bitmap: " + bitmap.getWidth() + ", " + bitmap.getHeight());
             try {
                 BitmapUtils.writeBitmapToFile(bitmap, new File(Environment.getExternalStorageDirectory() + "/crop_test.jpg"), 90);
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+
+        BitmapResult result1 = mImageView.getCroppedBitmapWithInfo();
+        if (result1.getState() == BitmapResult.State.SUCCESS) {
+            bitmap = result1.getBitmap();
+
+            if (bitmap != null) {
+                Log.d("Cropper", "crop2 bitmap: " + bitmap.getWidth() + ", " + bitmap.getHeight());
+
+                try {
+                    BitmapUtils.writeBitmapToFile(bitmap, new File(Environment.getExternalStorageDirectory() + "/crop_test_info.jpg"), 90);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

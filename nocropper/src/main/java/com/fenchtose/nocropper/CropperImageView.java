@@ -693,6 +693,129 @@ public class CropperImageView extends ImageView {
 
     }
 
+    public CropInfo getCropInfo() {
+        if (mBitmap == null) {
+            Log.e(TAG, "original image is not available");
+            return null;
+        }
+
+        Matrix matrix = getImageMatrix();
+
+        float xTrans = getMatrixValue(matrix, Matrix.MTRANS_X);
+        float yTrans = getMatrixValue(matrix, Matrix.MTRANS_Y);
+        float scale = getMatrixValue(matrix, Matrix.MSCALE_X);
+
+        if (DEBUG) {
+            Log.i(TAG, "xTrans: " + xTrans + ", yTrans: " + yTrans + " , scale: " + scale);
+            Log.i(TAG, "old bitmap: " + mBitmap.getWidth() + " " + mBitmap.getHeight());
+        }
+
+        // No scale/crop required.
+        if (xTrans > 0 && yTrans > 0 && scale <= mMinZoom) {
+            // Add padding if not square
+            int verticalPadding = mBitmap.getHeight() > mBitmap.getWidth() ? 0 : (mBitmap.getWidth() - mBitmap.getHeight()) / 2;
+            int horizontalPadding = mBitmap.getWidth() > mBitmap.getHeight() ? 0 : (mBitmap.getHeight() - mBitmap.getWidth()) / 2;
+            return CropInfo.cropCompleteBitmap(mBitmap, scale, mAddPaddingToMakeSquare, horizontalPadding, verticalPadding);
+        }
+
+        float cropY = - yTrans / scale;
+        float Y = getHeight() / scale;
+        float cropX = -xTrans / scale;
+        float X = getWidth() / scale;
+
+        if (DEBUG) {
+            Log.i(TAG, "cropY: " + cropY);
+            Log.i(TAG, "Y: " + Y);
+            Log.i(TAG, "cropX: " + cropX);
+            Log.i(TAG, "X: " + X);
+        }
+
+        if (cropY + Y > mBitmap.getHeight()) {
+            cropY = mBitmap.getHeight() - Y;
+            if (DEBUG) {
+                Log.i(TAG, "readjust cropY to: " + cropY);
+            }
+        }  else if (cropY < 0) {
+            cropY = 0;
+            if (DEBUG) {
+                Log.i(TAG, "readjust cropY to: " + cropY);
+            }
+        }
+
+        if (cropX + X > mBitmap.getWidth()) {
+            cropX = mBitmap.getWidth() - X;
+            if (DEBUG) {
+                Log.i(TAG, "readjust cropX to: " + cropX);
+            }
+        } else if (cropX < 0) {
+            cropX = 0;
+            if (DEBUG) {
+                Log.i(TAG, "readjust cropX to: " + cropX);
+            }
+        }
+
+        Rect rect;
+        int horizontalPadding = 0;
+        int verticalPadding = 0;
+
+        boolean isPaddingRequired = true;
+
+        if (mBitmap.getHeight() > mBitmap.getWidth()) {
+            // Height is greater than width.
+            if (xTrans >= 0) {
+                // Image is zoomed. Crop from height
+                rect = new Rect(0, (int)cropY, mBitmap.getWidth(), (int)(Y + cropY));
+                horizontalPadding = (int) ((Y - mBitmap.getWidth()) / 2);
+            } else {
+                // Crop from width and height both
+                rect = new Rect((int)cropX, (int)cropY, (int)(cropX + X), (int)(cropY + Y));
+                isPaddingRequired = false;
+            }
+        } else {
+            if (DEBUG) {
+                Log.i(TAG, "width > height");
+            }
+
+            if (yTrans >= 0) {
+                // Image is zoomed. Crop from width and add padding to make square
+                rect = new Rect((int)cropX, 0, (int)(cropX + X), mBitmap.getHeight());
+                verticalPadding = (int) ((X - mBitmap.getHeight()) / 2);
+
+                if (DEBUG) {
+                    Log.i(TAG, "yTrans >= 0 " + yTrans);
+                    Log.i(TAG, "rect: " + rect);
+                    Log.i(TAG, "vertical padding: " + verticalPadding);
+                }
+
+            } else {
+                // Crop from width and height both.
+                rect = new Rect((int)cropX, (int)cropY, (int)(cropX + X), (int)(cropY + Y));
+                isPaddingRequired = false;
+
+                if (DEBUG) {
+                    Log.i(TAG, "yTrans < 0 " + yTrans);
+                    Log.i(TAG, "rect: " + rect);
+                }
+
+            }
+        }
+
+        return CropInfo.cropFromRect(rect, scale, mAddPaddingToMakeSquare && isPaddingRequired, horizontalPadding, verticalPadding);
+    }
+
+    public Bitmap getCroppedBitmap(CropInfo cropInfo) throws OutOfMemoryError {
+        if (mBitmap == null) {
+            Log.e(TAG, "original image is not available");
+            return null;
+        }
+
+        if (!cropInfo.addPadding) {
+            return Bitmap.createBitmap(mBitmap, cropInfo.x, cropInfo.y, cropInfo.width, cropInfo.height);
+        }
+
+        return BitmapUtils.addPadding(mBitmap, cropInfo, mPaintColor);
+    }
+
     private Bitmap getCroppedBitmap() throws OutOfMemoryError {
         if (mBitmap == null) {
             Log.e(TAG, "original image is not available");

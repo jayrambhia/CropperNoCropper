@@ -37,4 +37,30 @@ public class BitmapUtils {
         }
     }
 
+    public static Bitmap addPadding(Bitmap bmp, CropInfo info, int color) throws OutOfMemoryError {
+
+        if (bmp == null) {
+            return null;
+        }
+
+        Bitmap bitmap = null;
+
+        try {
+            int biggerParam = Math.max(info.width + 2*info.horizontalPadding, info.height + 2*info.verticalPadding);
+            bitmap = Bitmap.createBitmap(biggerParam, biggerParam, bmp.getConfig());
+            Canvas canvas = new Canvas(bitmap);
+            canvas.drawColor(color);
+
+            canvas.drawBitmap(bmp, info.horizontalPadding, info.verticalPadding, null);
+            return bitmap;
+        } catch (OutOfMemoryError e) {
+            if (bitmap != null && !bitmap.isRecycled()) {
+                bitmap.recycle();
+                bitmap = null;
+            }
+
+            throw e;
+        }
+    }
+
 }
