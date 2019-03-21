@@ -328,24 +328,14 @@ public class CropperImageView extends ImageView {
             Log.i(TAG, "drawable size: (" + width + " ," + height + ")");
         }
 
-        int min_dimen = Math.max(width, height);
-        float scaleFactor = (float)min_dimen/(float)frameDimen;
+        int maxDimen = Math.max(width, height);
+        float scaleFactor = (float)maxDimen/(float)frameDimen;
 
         Matrix matrix = new Matrix();
         matrix.setScale(1f / scaleFactor, 1f / scaleFactor);
         matrix.postTranslate((frameDimen - width / scaleFactor) / 2,
                 (frameDimen - height / scaleFactor) / 2);
         setImageMatrix(matrix);
-
-        // If over scrolled, return back to the place.
-        float tx = getMatrixValue(matrix, Matrix.MTRANS_X);
-        float ty = getMatrixValue(matrix, Matrix.MTRANS_Y);
-        float scaleX = getMatrixValue(matrix, Matrix.MSCALE_X);
-        if (scaleX < mMinZoom) {
-            float xx = getWidth() / 2 - mMinZoom * drawable.getIntrinsicWidth() / 2;
-            float yy = getHeight() / 2 - mMinZoom * drawable.getIntrinsicHeight() / 2;
-            animateAdjustmentWithScale(tx, xx, ty, yy, scaleX, mMinZoom);
-        }
     }
 
     public boolean onScroll(float distanceX, float distanceY) {
