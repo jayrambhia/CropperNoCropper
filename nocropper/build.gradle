@@ -2,20 +2,20 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
-version = "0.3.0"
+version = "0.3.1"
 group = "com.fenchtose.nocropper"
 
 def siteUrl = "https://github.com/jayrambhia/CropperNoCropper"
 def gitUrl = "https://github.com/jayrambhia/CropperNoCropper.git"
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
     resourcePrefix "nocropper__"
 
     defaultConfig {
         minSdkVersion 11
-        targetSdkVersion 25
+        targetSdkVersion 28
         versionCode 1
         versionName version
     }
@@ -95,6 +95,6 @@ artifacts {
     archives sourcesJar
 }
 
-task findConventions << {
-    println project.getConvention()
-}
+//task findConventions << {
+//    println project.getConvention()
+//}

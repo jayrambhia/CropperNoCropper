@@ -6,18 +6,21 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.CheckBox;
 import android.widget.Toast;
 
 import com.fenchtose.nocropper.BitmapResult;
 import com.fenchtose.nocropper.CropInfo;
+import com.fenchtose.nocropper.CropMatrix;
 import com.fenchtose.nocropper.CropResult;
 import com.fenchtose.nocropper.CropState;
 import com.fenchtose.nocropper.CropperCallback;
@@ -26,11 +29,8 @@ import com.fenchtose.nocropper.ScaledCropper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnCheckedChanged;
-import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,13 +38,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_GALLERY = 21;
     private static final String TAG = "MainActivity";
 
-    @Bind(R.id.imageview)
     CropperView mImageView;
-
-    @Bind(R.id.original_checkbox)
     CheckBox originalImageCheckbox;
-
-    @Bind(R.id.crop_checkbox)
     CheckBox cropAsyncCheckbox;
 
     private Bitmap originalBitmap;
@@ -52,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
     private boolean isSnappedToCenter = false;
 
     private int rotationCount = 0;
+
+    private HashMap<String, CropMatrix> matrixMap = new HashMap<>();
+    private String currentFilePath = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +60,46 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "Set landscape mode");
             setContentView(R.layout.activity_main_landscape);
         }
-        ButterKnife.bind(this);
+
+        mImageView = findViewById(R.id.imageview);
+        originalImageCheckbox = findViewById(R.id.original_checkbox);
+        cropAsyncCheckbox = findViewById(R.id.crop_checkbox);
+
+        findViewById(R.id.image_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startGalleryIntent();
+            }
+        });
+
+        findViewById(R.id.crop_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onImageCropClicked();
+            }
+        });
+
+        findViewById(R.id.rotate_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rotateImage();
+            }
+        });
+
+        findViewById(R.id.snap_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                snapImage();
+            }
+        });
+
+        findViewById(R.id.gesture_checkbox).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleGestures();
+            }
+        });
+
         mImageView.setDebug(true);
 
         mImageView.setGridCallback(new CropperView.GridCallback() {
@@ -78,12 +115,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @OnClick(R.id.image_button)
     public void onImageButtonClicked() {
         startGalleryIntent();
     }
 
-    @OnClick(R.id.crop_button)
     public void onImageCropClicked() {
         if (cropAsyncCheckbox.isChecked()) {
             cropImageAsync();
@@ -92,17 +127,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick(R.id.rotate_button)
-    public void onImageRotateClicked() {
-        rotateImage();
-    }
-
-    @OnClick(R.id.snap_button)
-    public void onImageSnapClicked() {
-        snapImage();
-    }
-
-    @OnCheckedChanged(R.id.gesture_checkbox)
     public void toggleGestures() {
         boolean enabled = mImageView.isGestureEnabled();
         enabled = !enabled;
@@ -111,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadNewImage(String filePath) {
+        this.currentFilePath = filePath;
         rotationCount = 0;
         Log.i(TAG, "load image: " + filePath);
         mBitmap = BitmapFactory.decodeFile(filePath);
@@ -141,9 +166,22 @@ public class MainActivity extends AppCompatActivity {
                 (int)(mBitmap.getHeight()/scale1280), true);
 
         mImageView.setImageBitmap(mBitmap);
+        final CropMatrix matrix = matrixMap.get(filePath);
+        if (matrix != null) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mImageView.setCropMatrix(matrix, true);
+                }
+            }, 30);
+        }
     }
 
     private void startGalleryIntent() {
+
+        if (currentFilePath != null) {
+            matrixMap.put(currentFilePath, mImageView.getCropMatrix());
+        }
 
         if (!hasGalleryPermission()) {
             askForGalleryPermission();
