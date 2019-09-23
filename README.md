@@ -41,7 +41,7 @@ There are some styling and customizations also available.
 ### Dependency
 
     dependencies {
-        compile 'com.fenchtose.nocropper:nocropper:0.3.0'
+        compile 'com.fenchtose.nocropper:nocropper:0.3.1'
     }
 
 ## CropperImageView
@@ -83,6 +83,8 @@ And that's it. `CropperView` is ready to be used anywhere in the app. No depende
  - `getCropInfo()` - Get `CropInfo` which you can use manually to crop the bitmap or use it to crop the original un-scaled bitmap.
  - `release()` - Remove and Recycle Bitmap
  - `setGridCallback(GridCallback callback)` - More control to you about when you want to show the grid.
+ - `getCropMatrix()` - Get `CropMatrix` - Use this to restore the crop state of the image.
+ - `setCropMatrix(CropMatrix matrix, boolean animate)` - Restore crop state of the image.
 
 ### Styleables
 

@@ -1,3 +1,6 @@
+### V 0.3.1 (2019-09-23)
+ - `CropMatrix` added. Use this to preserve the state of scale and translation.
+
 ### V 0.3.0 (2017-12-30)
  - Pre-scaling support is here! It's just different now.
  - Load scaled down version of the original image and use `CropInfo`.
