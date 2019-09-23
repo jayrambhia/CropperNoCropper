@@ -842,6 +842,34 @@ public class CropperImageView extends ImageView {
         }
     }
 
+    public CropMatrix getCropMatrix() {
+        Matrix matrix = getImageMatrix();
+        return new CropMatrix(
+            getMatrixValue(matrix, Matrix.MSCALE_X),
+            getMatrixValue(matrix, Matrix.MTRANS_X),
+            getMatrixValue(matrix, Matrix.MTRANS_Y)
+        );
+    }
+
+    public void setCropMatrix(CropMatrix matrix, boolean animate) {
+        if (!animate) {
+            Matrix _matrix = new Matrix();
+            _matrix.setScale(matrix.scale, matrix.scale);
+            _matrix.postTranslate(matrix.xTrans, matrix.yTrans);
+            setImageMatrix(_matrix);
+            invalidate();
+        } else {
+            animateAdjustmentWithScale(
+                getMatrixValue(getImageMatrix(), Matrix.MTRANS_X),
+                matrix.xTrans,
+                getMatrixValue(getImageMatrix(), Matrix.MTRANS_Y),
+                matrix.yTrans,
+                getScale(getImageMatrix()),
+                matrix.scale
+            );
+        }
+    }
+
     // Scroll and Gesture Listeners
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         @Override
@@ -916,8 +944,8 @@ public class CropperImageView extends ImageView {
 
                 Integer value = (Integer)animation.getAnimatedValue();
 
-                matrix.postScale((scaleEnd - scaleStart) * value / 20f + scaleStart,
-                        (scaleEnd - scaleStart) * value / 20f + scaleStart);
+                float sx = (scaleEnd - scaleStart) * value / 20f + scaleStart;
+                matrix.postScale(sx, sx);
                 matrix.postTranslate((xEnd - xStart) * value / 20f + xStart,
                         (yEnd - yStart) * value / 20f + yStart);
 

@@ -207,6 +207,14 @@ public class CropperView extends FrameLayout {
         mImageView.setInitWithFitToCenter(status);
     }
 
+    public CropMatrix getCropMatrix() {
+        return mImageView.getCropMatrix();
+    }
+
+    public void setCropMatrix(CropMatrix matrix, boolean animate) {
+        mImageView.setCropMatrix(matrix, animate);
+    }
+
     private class TouchGestureCallback implements CropperImageView.GestureCallback {
 
         @Override
