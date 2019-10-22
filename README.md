@@ -84,7 +84,7 @@ And that's it. `CropperView` is ready to be used anywhere in the app. No depende
  - `release()` - Remove and Recycle Bitmap
  - `setGridCallback(GridCallback callback)` - More control to you about when you want to show the grid.
  - `getCropMatrix()` - Get `CropMatrix` - Use this to restore the crop state of the image.
- - `setCropMatrix(CropMatrix matrix, boolean animate)` - Restore crop state of the image.
+ - `setCropMatrix(CropMatrix matrix, boolean animate)` - Restore crop state of the image. If this is called right after `setImageBitmap`, it should be called with a delay.
 
 ### Styleables
 
@@ -161,8 +161,29 @@ It's an interface class for callback. You can control when you want to show this
  cropper.cropBitmap() # for sync
  ```
 
+## CropMatrix
+
+ ### What is it?
+
+ CropMatrix is a state of the `CropperView` based on the translation and zoom of the image. This can be used if you are working with
+ multiple crops or if the user paused the app and you would like to restore the exact position and zoom of the image in the cropper.
+
+ ### How to get it?
+
+ `CropperView.getCropMatrix()` will return `CropMatrix`. It contains `scale`, `xTranslation` and `yTranslation`. It's best if it's not edited manually as invalid values may lead to undesired behavior.
+
+ ### How to use it?
+
+ When you wish to restore the saved position, use `CropperView.setCropMatrix(matrix, animate)`. `animate` is a boolean flag. If it's true, the image would animate from the current position and scale to the new one.
+ If `animate` is false, it will go to the new position and scale instantly.
+
+ **Note**: If you want to call this method right after setting the Bitmap, you'd need to call it with delay (wait for the bitmap to load).
+
 ### 0.2 to 0.3 update note:
-`CropInfo` has been introduced. You can use it crop original un-scaled or un-rotated bitmaps.
+
+ - `CropInfo` has been introduced. You can use it crop original un-scaled or un-rotated bitmaps.
+ - `CropMatrix` has been introduced. You can use it to restore the state of the image.
+
 
 ### 0.1 to 0.2 update note:
 
