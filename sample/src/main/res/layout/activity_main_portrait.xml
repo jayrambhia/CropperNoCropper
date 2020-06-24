@@ -12,14 +12,14 @@
         android:layout_height="wrap_content">
 
         <com.fenchtose.nocropper.CropperView
-            android:background="#ff282828"
             android:id="@+id/imageview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="#ff282828"
+            app:nocropper__grid_color="@color/colorAccent"
             app:nocropper__grid_opacity="0.8"
-            app:nocropper__grid_thickness="0.8dp"
-            app:nocropper__padding_color="@color/colorAccent"
-            app:nocropper__grid_color="@color/colorAccent" />
+            app:nocropper__grid_thickness="0.80dp"
+            app:nocropper__padding_color="@color/colorAccent" />
 
         <ImageView
             android:id="@+id/snap_button"
@@ -88,6 +88,20 @@
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="Crop Async"/>
+
+        <CheckBox
+            android:id="@+id/zoom_limit"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="Zoom limit"/>
+
+        <CheckBox
+            android:id="@+id/keep_crop_state"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="Keep crop state"/>
 
     </GridLayout>
 

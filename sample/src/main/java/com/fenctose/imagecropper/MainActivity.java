@@ -37,10 +37,12 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_READ_PERMISSION = 22;
     private static final int REQUEST_GALLERY = 21;
     private static final String TAG = "MainActivity";
+    private static final String CroppedImagesPath = Environment.getExternalStorageDirectory().toString();
 
     CropperView mImageView;
     CheckBox originalImageCheckbox;
     CheckBox cropAsyncCheckbox;
+    CheckBox keepCropState;
 
     private Bitmap originalBitmap;
     private Bitmap mBitmap;
@@ -49,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private int rotationCount = 0;
 
     private HashMap<String, CropMatrix> matrixMap = new HashMap<>();
+    private CropMatrix lastCropMatrix = null;
     private String currentFilePath = null;
 
     @Override
@@ -64,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
         mImageView = findViewById(R.id.imageview);
         originalImageCheckbox = findViewById(R.id.original_checkbox);
         cropAsyncCheckbox = findViewById(R.id.crop_checkbox);
+        keepCropState = findViewById(R.id.keep_crop_state);
 
         findViewById(R.id.image_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+
     }
 
     public void onImageButtonClicked() {
@@ -143,37 +149,64 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "bitmap: " + mBitmap.getWidth() + " " + mBitmap.getHeight());
 
         int maxP = Math.max(mBitmap.getWidth(), mBitmap.getHeight());
-        float scale1280 = (float)maxP / 1280;
-        Log.i(TAG, "scaled: " + scale1280 + " - " + (1/scale1280));
+        float scale1280 = (float) maxP / 1280;
+        Log.i(TAG, "scaled: " + scale1280 + " - " + (1 / scale1280));
 
-        if (mImageView.getWidth() != 0) {
-            mImageView.setMaxZoom(mImageView.getWidth() * 2 / 1280f);
-        } else {
+        calculateBitMapMaxZoom();
 
-            ViewTreeObserver vto = mImageView.getViewTreeObserver();
-            vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    mImageView.getViewTreeObserver().removeOnPreDrawListener(this);
-                    mImageView.setMaxZoom(mImageView.getWidth() * 2 / 1280f);
-                    return true;
-                }
-            });
-
-        }
-
-        mBitmap = Bitmap.createScaledBitmap(mBitmap, (int)(mBitmap.getWidth()/scale1280),
-                (int)(mBitmap.getHeight()/scale1280), true);
+        mBitmap = Bitmap.createScaledBitmap(mBitmap, (int) (mBitmap.getWidth() / scale1280),
+                (int) (mBitmap.getHeight() / scale1280), true);
 
         mImageView.setImageBitmap(mBitmap);
-        final CropMatrix matrix = matrixMap.get(filePath);
-        if (matrix != null) {
+
+        loadCachedCropMatrix();
+    }
+
+    private void loadCachedCropMatrix() {
+        CropMatrix cropMatrix = matrixMap.get(currentFilePath);
+        if (cropMatrix == null && keepCropState.isChecked()){
+            cropMatrix = lastCropMatrix;
+        }
+        final CropMatrix finalMatrix = cropMatrix;
+
+        if (finalMatrix != null) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    mImageView.setCropMatrix(matrix, true);
+                    mImageView.setCropMatrix(finalMatrix, true);
                 }
             }, 30);
+        }
+    }
+
+    private void calculateBitMapMaxZoom() {
+        CheckBox zoomLimit = findViewById(R.id.zoom_limit);
+
+        if (zoomLimit.isChecked()) {
+
+            float widthCoefficient = (float) mImageView.getWidth() / mBitmap.getWidth();
+            float heightCoefficient = (float) mImageView.getHeight() / mBitmap.getHeight();
+
+            float maxZoom = Math.max(heightCoefficient, widthCoefficient) / Math.min(heightCoefficient, widthCoefficient);
+
+            mImageView.setMaxZoom(maxZoom - 0.15f);
+        } else {
+            if (mImageView.getWidth() != 0) {
+                float maxZoom = mImageView.getWidth() * 2 / 1280f;
+                mImageView.setMaxZoom(maxZoom);
+            } else {
+
+                ViewTreeObserver vto = mImageView.getViewTreeObserver();
+                vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        mImageView.getViewTreeObserver().removeOnPreDrawListener(this);
+                        float maxZoom = mImageView.getWidth() * 2 / 1280f;
+                        mImageView.setMaxZoom(maxZoom);
+                        return true;
+                    }
+                });
+            }
         }
     }
 
@@ -181,6 +214,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (currentFilePath != null) {
             matrixMap.put(currentFilePath, mImageView.getCropMatrix());
+            lastCropMatrix = mImageView.getCropMatrix();
         }
 
         if (!hasGalleryPermission()) {
@@ -234,7 +268,9 @@ public class MainActivity extends AppCompatActivity {
                 if (bitmap != null) {
 
                     try {
-                        BitmapUtils.writeBitmapToFile(bitmap, new File(Environment.getExternalStorageDirectory() + "/crop_test.jpg"), 90);
+                        String imagePath = CroppedImagesPath + "/crop_test.jpg";
+                        BitmapUtils.writeBitmapToFile(bitmap, new File(imagePath), 90);
+                        sendSuccessfullyMessage(imagePath);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -270,7 +306,9 @@ public class MainActivity extends AppCompatActivity {
         if (bitmap != null) {
             Log.d("Cropper", "crop1 bitmap: " + bitmap.getWidth() + ", " + bitmap.getHeight());
             try {
-                BitmapUtils.writeBitmapToFile(bitmap, new File(Environment.getExternalStorageDirectory() + "/crop_test.jpg"), 90);
+                String imagePath = CroppedImagesPath + "/crop_test.jpg";
+                BitmapUtils.writeBitmapToFile(bitmap, new File(imagePath), 90);
+                sendSuccessfullyMessage(imagePath);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -282,6 +320,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void sendSuccessfullyMessage(String imagePath) {
+        Toast.makeText(this, "Cropped image was stored in " + imagePath, Toast.LENGTH_SHORT).show();
+    }
+
     private ScaledCropper prepareCropForOriginalImage() {
         CropResult result = mImageView.getCropInfo();
         if (result.getCropInfo() == null) {
@@ -291,10 +333,10 @@ public class MainActivity extends AppCompatActivity {
         float scale;
         if (rotationCount % 2 == 0) {
             // same width and height
-            scale = (float) originalBitmap.getWidth()/mBitmap.getWidth();
+            scale = (float) originalBitmap.getWidth() / mBitmap.getWidth();
         } else {
             // width and height are interchanged
-            scale = (float) originalBitmap.getWidth()/mBitmap.getHeight();
+            scale = (float) originalBitmap.getWidth() / mBitmap.getHeight();
         }
 
         CropInfo cropInfo = result.getCropInfo().rotate90XTimes(mBitmap.getWidth(), mBitmap.getHeight(), rotationCount);
@@ -331,7 +373,9 @@ public class MainActivity extends AppCompatActivity {
                 public void onCropped(Bitmap bitmap) {
                     if (bitmap != null) {
                         try {
-                            BitmapUtils.writeBitmapToFile(bitmap, new File(Environment.getExternalStorageDirectory() + "/crop_test_info_orig.jpg"), 90);
+                            String imagePath = CroppedImagesPath + "/crop_test_info_orig.jpg";
+                            BitmapUtils.writeBitmapToFile(bitmap, new File(imagePath), 90);
+                            sendSuccessfullyMessage(imagePath);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
