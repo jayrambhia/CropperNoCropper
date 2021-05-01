@@ -1,3 +1,8 @@
+### V 0.3.2 (2021-05-01)
+
+ - Migrated from Bintray to JitPack.
+ - Using AndroidX in Sample.
+
 ### V 0.3.1 (2019-09-23)
  - `CropMatrix` added. Use this to preserve the state of scale and translation.
 

@@ -1,5 +1,7 @@
 ## Cropper - NoCropper
 
+[![](https://jitpack.io/v/jayrambhia/CropperNoCropper.svg)](https://jitpack.io/#jayrambhia/CropperNoCropper)
+
 This is a lightweight Image Cropper for Android which also supports no-crop feature.
 
 ## Version 0.3.0 adds pre-scale support!
@@ -24,7 +26,9 @@ There are some styling and customizations also available.
 
 ## How To Install
 
-### Maven
+### JCenter / Bintray (Deprecated)
+
+##### Maven
 
     repositories {
         maven {
@@ -32,16 +36,30 @@ There are some styling and customizations also available.
         }
     }
 
-### JCenter
+or
+
+##### JCenter
 
     repositories {
         jcenter()
     }
 
-### Dependency
+##### Dependency
 
     dependencies {
         compile 'com.fenchtose.nocropper:nocropper:0.3.1'
+    }
+
+### JitPack
+
+    repositories {
+        maven {
+            url  "https://jitpack.io"
+        }
+    }
+    
+    dependencies {
+        implementation 'com.github.jayrambhia:CropperNoCropper:0.3.2'
     }
 
 ## CropperImageView

@@ -24,6 +24,6 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     testImplementation 'junit:junit:4.13.2'
     implementation "androidx.appcompat:appcompat:1.2.0"
-//    implementation 'com.fenchtose.nocropper:nocropper:0.3.1'
-    implementation project(':nocropper')
+    implementation 'com.github.jayrambhia:CropperNoCropper:0.3.2'
+//    implementation project(':nocropper')
 }
