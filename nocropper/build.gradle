@@ -1,21 +1,21 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven'
 
-version = "0.3.1"
-group = "com.fenchtose.nocropper"
+version = "0.3.2"
+group = "com.github.jayrambhia"
 
 def siteUrl = "https://github.com/jayrambhia/CropperNoCropper"
 def gitUrl = "https://github.com/jayrambhia/CropperNoCropper.git"
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion "28.0.3"
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
     resourcePrefix "nocropper__"
 
     defaultConfig {
         minSdkVersion 11
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName version
     }
@@ -25,53 +25,6 @@ android {
 
 Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
-
-bintray {
-    user = properties.getProperty("bintray.user")
-    key = properties.getProperty("bintray.apiKey")
-
-    configurations = ['archives']
-    pkg {
-        repo = "maven"
-        name = "NoCropper"
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        licenses = ["Apache-2.0"]
-        publish = true
-    }
-}
-
-install {
-    repositories.mavenInstaller {
-        pom {
-            project {
-                packaging 'aar'
-                name 'A Simple Image Cropper which also features No Cropper'
-                url siteUrl
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'jayarambhia'
-                        name ' Jay Rambhia'
-                        email ' jayrambhia777@gmail.com'
-                    }
-                }
-
-                scm {
-                    connection gitUrl
-                    developerConnection gitUrl
-                    url siteUrl
-                }
-            }
-        }
-    }
-}
 
 dependencies {
 }
@@ -94,7 +47,3 @@ artifacts {
     archives javadocJar
     archives sourcesJar
 }
-
-//task findConventions << {
-//    println project.getConvention()
-//}
